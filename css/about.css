@@ -1,0 +1,495 @@
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+
+background:#f5f7fa;
+
+color:#222;
+
+}
+
+/* ==========================
+NAVBAR
+========================== */
+
+nav{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+padding:18px 70px;
+
+background:#162334;
+
+position:sticky;
+
+top:0;
+
+z-index:1000;
+
+}
+
+.logo{
+
+font-size:32px;
+
+font-weight:700;
+
+color:#fff;
+
+}
+
+.logo span{
+
+color:#d8aa35;
+
+}
+
+nav ul{
+
+display:flex;
+
+list-style:none;
+
+gap:28px;
+
+}
+
+nav ul li a{
+
+text-decoration:none;
+
+color:#fff;
+
+font-size:15px;
+
+transition:.3s;
+
+}
+
+nav ul li a:hover,
+nav ul li a.active{
+
+color:#d8aa35;
+
+}
+
+/* ==========================
+HERO
+========================== */
+
+.hero{
+
+height:430px;
+
+background:
+
+linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),
+
+url("../images/about-bg.jpg");
+
+background-size:cover;
+
+background-position:center;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+text-align:center;
+
+color:#fff;
+
+}
+
+.hero-content h1{
+
+font-size:56px;
+
+margin-bottom:20px;
+
+}
+
+.hero-content h1 span{
+
+color:#d8aa35;
+
+}
+
+.hero-content p{
+
+font-size:20px;
+
+max-width:700px;
+
+margin:auto;
+
+line-height:1.8;
+
+}
+
+/* ==========================
+ABOUT
+========================== */
+
+.about{
+
+padding:80px 10%;
+
+background:#fff;
+
+}
+
+.about-text{
+
+max-width:900px;
+
+margin:auto;
+
+text-align:center;
+
+}
+
+.about-text h2{
+
+font-size:42px;
+
+margin-bottom:25px;
+
+color:#162334;
+
+}
+
+.about-text p{
+
+font-size:18px;
+
+line-height:1.9;
+
+color:#555;
+
+}
+
+/* ==========================
+MISSION & VISION
+========================== */
+
+.mission{
+
+padding:80px 10%;
+
+display:grid;
+
+grid-template-columns:repeat(2,1fr);
+
+gap:35px;
+
+background:#f8f9fb;
+
+}
+
+.card{
+
+background:#fff;
+
+padding:40px;
+
+border-radius:20px;
+
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+text-align:center;
+
+transition:.3s;
+
+}
+
+.card:hover{
+
+transform:translateY(-8px);
+
+}
+
+.card i{
+
+font-size:45px;
+
+color:#d8aa35;
+
+margin-bottom:20px;
+
+}
+
+.card h2{
+
+font-size:28px;
+
+margin-bottom:15px;
+
+color:#162334;
+
+}
+
+.card p{
+
+font-size:17px;
+
+line-height:1.8;
+
+color:#555;
+
+}
+
+
+/* ==========================
+WHY CHOOSE US
+========================== */
+
+.choose{
+
+padding:80px 10%;
+
+background:#fff;
+
+text-align:center;
+
+}
+
+.choose h2{
+
+font-size:42px;
+
+margin-bottom:50px;
+
+color:#162334;
+
+}
+
+.choose-grid{
+
+display:grid;
+
+grid-template-columns:repeat(4,1fr);
+
+gap:30px;
+
+}
+
+.choose-grid div{
+
+background:#f7f7f7;
+
+padding:35px 25px;
+
+border-radius:18px;
+
+transition:.3s;
+
+}
+
+.choose-grid div:hover{
+
+background:#162334;
+
+color:#fff;
+
+transform:translateY(-8px);
+
+}
+
+.choose-grid div:hover p{
+
+color:#eee;
+
+}
+
+.choose-grid i{
+
+font-size:42px;
+
+color:#d8aa35;
+
+margin-bottom:18px;
+
+}
+
+.choose-grid h3{
+
+margin-bottom:12px;
+
+font-size:22px;
+
+}
+
+.choose-grid p{
+
+font-size:15px;
+
+line-height:1.7;
+
+color:#666;
+
+}
+
+
+/* ==========================
+STATISTICS
+========================== */
+
+.stats{
+
+padding:80px 10%;
+
+background:#162334;
+
+display:grid;
+
+grid-template-columns:repeat(4,1fr);
+
+text-align:center;
+
+color:#fff;
+
+}
+
+.stats h1{
+
+font-size:50px;
+
+color:#d8aa35;
+
+margin-bottom:10px;
+
+}
+
+.stats p{
+
+font-size:18px;
+
+}
+
+
+/* ==========================
+FOOTER
+========================== */
+
+footer{
+
+background:#0d1b2a;
+
+padding:25px;
+
+text-align:center;
+
+color:#fff;
+
+font-size:15px;
+
+}
+
+footer span{
+
+color:#d8aa35;
+
+font-weight:600;
+
+}
+
+
+/* ==========================
+RESPONSIVE
+========================== */
+
+@media(max-width:992px){
+
+.mission{
+
+grid-template-columns:1fr;
+
+}
+
+.choose-grid{
+
+grid-template-columns:repeat(2,1fr);
+
+}
+
+.stats{
+
+grid-template-columns:repeat(2,1fr);
+
+gap:30px;
+
+}
+
+}
+
+@media(max-width:600px){
+
+nav{
+
+flex-direction:column;
+
+gap:15px;
+
+padding:20px;
+
+}
+
+nav ul{
+
+flex-wrap:wrap;
+
+justify-content:center;
+
+}
+
+.hero{
+
+height:320px;
+
+}
+
+.hero-content h1{
+
+font-size:38px;
+
+}
+
+.hero-content p{
+
+font-size:16px;
+
+}
+
+.about-text h2,
+
+.choose h2{
+
+font-size:30px;
+
+}
+
+.choose-grid{
+
+grid-template-columns:1fr;
+
+}
+
+.stats{
+
+grid-template-columns:1fr;
+
+}
+
+}

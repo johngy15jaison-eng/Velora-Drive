@@ -1,0 +1,532 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #f6f7fb;
+    color: #172033;
+    min-height: 100vh;
+}
+
+
+/* =========================
+   NAVBAR
+========================= */
+
+.navbar {
+    background: #ffffff;
+    border-bottom: 1px solid #e8eaf0;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 22px 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    text-decoration: none;
+    font-size: 27px;
+    font-weight: 700;
+    color: #18233a;
+}
+
+.logo span {
+    color: #d7a83f;
+}
+
+.nav-links {
+    display: flex;
+    gap: 25px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #4b5568;
+    font-size: 14px;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.nav-links a:hover {
+    color: #c39535;
+}
+
+
+/* =========================
+   MAIN
+========================= */
+
+.success-page {
+    max-width: 950px;
+    margin: auto;
+    padding: 70px 25px;
+    text-align: center;
+}
+
+
+/* =========================
+   SUCCESS ICON
+========================= */
+
+.success-icon {
+    width: 82px;
+    height: 82px;
+
+    margin: 0 auto 22px;
+
+    border-radius: 50%;
+
+    background: #e9f8f0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #19a968;
+
+    font-size: 38px;
+
+    border: 7px solid #f3fbf7;
+}
+
+.success-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    color: #17965d;
+
+    letter-spacing: 1.5px;
+
+    margin-bottom: 12px;
+}
+
+.success-page h1 {
+    font-size: 38px;
+    color: #172033;
+    margin-bottom: 12px;
+}
+
+.success-message {
+    max-width: 650px;
+    margin: auto;
+
+    color: #6b7280;
+    line-height: 1.7;
+}
+
+
+/* =========================
+   BOOKING CARD
+========================= */
+
+.booking-card {
+    background: #ffffff;
+
+    margin-top: 42px;
+
+    border-radius: 18px;
+
+    border: 1px solid #e6e8ee;
+
+    box-shadow: 0 15px 45px rgba(20, 30, 50, 0.08);
+
+    overflow: hidden;
+
+    text-align: left;
+}
+
+
+/* =========================
+   VEHICLE
+========================= */
+
+.vehicle-section {
+    padding: 25px;
+
+    display: flex;
+    align-items: center;
+    gap: 24px;
+
+    background: #fafbfc;
+}
+
+.vehicle-image {
+    width: 210px;
+    height: 125px;
+
+    object-fit: cover;
+
+    border-radius: 12px;
+}
+
+.vehicle-placeholder {
+    width: 210px;
+    height: 125px;
+
+    border-radius: 12px;
+
+    background: #e9ecf2;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 40px;
+    color: #9aa2b1;
+}
+
+.vehicle-info h2 {
+    margin: 9px 0;
+    font-size: 25px;
+    color: #18233a;
+}
+
+.vehicle-info p {
+    color: #21a568;
+    font-size: 14px;
+}
+
+.vehicle-info p i {
+    margin-right: 6px;
+}
+
+.premium-badge {
+    display: inline-flex;
+
+    align-items: center;
+    gap: 6px;
+
+    padding: 6px 10px;
+
+    border-radius: 5px;
+
+    background: #fff6dd;
+
+    color: #b18118;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.7px;
+}
+
+
+/* =========================
+   BOOKING ID
+========================= */
+
+.booking-id {
+    padding: 18px 25px;
+
+    border-bottom: 1px solid #eceef2;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.booking-id span {
+    color: #8a92a1;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.booking-id strong {
+    color: #26314a;
+    font-size: 15px;
+}
+
+
+/* =========================
+   DETAILS
+========================= */
+
+.details-grid {
+    padding: 25px;
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 24px;
+
+    border-bottom: 1px solid #eceef2;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.detail-item span {
+    color: #8a92a1;
+    font-size: 12px;
+}
+
+.detail-item span i {
+    width: 18px;
+    color: #9b7425;
+}
+
+.detail-item strong {
+    color: #273248;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.detail-item .paid {
+    color: #1aa368;
+}
+
+
+/* =========================
+   TOTAL
+========================= */
+
+.total-section {
+    padding: 25px;
+
+    background: #fffaf0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+}
+
+.total-section span {
+    display: block;
+
+    color: #8b7650;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+}
+
+.total-section small {
+    display: block;
+
+    color: #7d8797;
+
+    margin-top: 5px;
+}
+
+.total-section strong {
+    font-size: 28px;
+    color: #bd8a1e;
+}
+
+
+/* =========================
+   BUTTONS
+========================= */
+
+.action-buttons {
+    margin-top: 30px;
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 15px;
+}
+
+.primary-button,
+.secondary-button {
+    padding: 14px 23px;
+
+    border-radius: 9px;
+
+    text-decoration: none;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    transition: 0.3s;
+}
+
+.primary-button {
+    background: #1c2942;
+    color: #ffffff;
+}
+
+.primary-button:hover {
+    background: #101a2c;
+    transform: translateY(-2px);
+}
+
+.secondary-button {
+    background: #ffffff;
+    color: #273248;
+
+    border: 1px solid #dfe2e8;
+}
+
+.secondary-button:hover {
+    border-color: #c69a38;
+    color: #b07f18;
+}
+
+
+/* =========================
+   SECURITY
+========================= */
+
+.confirmation-note {
+    margin: 30px auto 0;
+
+    max-width: 650px;
+
+    padding: 18px 22px;
+
+    background: #ffffff;
+
+    border: 1px solid #e6e8ee;
+
+    border-radius: 12px;
+
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 14px;
+
+    text-align: left;
+}
+
+.confirmation-note > i {
+    color: #b88a28;
+    font-size: 20px;
+    margin-top: 2px;
+}
+
+.confirmation-note strong {
+    font-size: 13px;
+}
+
+.confirmation-note p {
+    margin-top: 4px;
+
+    color: #7b8493;
+
+    font-size: 12px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================
+   ERROR
+========================= */
+
+.error-card {
+    background: #ffffff;
+
+    padding: 45px;
+
+    margin-top: 40px;
+
+    border-radius: 15px;
+
+    border: 1px solid #e6e8ee;
+}
+
+.error-card > i {
+    font-size: 38px;
+    color: #d69b28;
+}
+
+.error-card h2 {
+    margin: 15px 0 8px;
+}
+
+.error-card p {
+    color: #777f8d;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+footer {
+    text-align: center;
+
+    padding: 25px;
+
+    color: #8b93a2;
+
+    font-size: 12px;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 800px) {
+
+    .nav-container {
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .success-page {
+        padding-top: 45px;
+    }
+
+    .success-page h1 {
+        font-size: 30px;
+    }
+
+    .vehicle-section {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .vehicle-image,
+    .vehicle-placeholder {
+        width: 100%;
+        height: 190px;
+    }
+
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .primary-button,
+    .secondary-button {
+        text-align: center;
+    }
+
+}

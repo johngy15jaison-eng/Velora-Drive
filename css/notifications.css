@@ -1,0 +1,528 @@
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+
+background:linear-gradient(135deg,#081b29,#0d3b66);
+
+min-height:100vh;
+
+}
+
+/* ===========================
+NAVBAR
+=========================== */
+
+nav{
+
+width:100%;
+
+padding:18px 8%;
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+background:#06131d;
+
+box-shadow:0 5px 15px rgba(0,0,0,.3);
+
+}
+
+.logo{
+
+font-size:30px;
+
+font-weight:700;
+
+color:white;
+
+}
+
+.logo span{
+
+color:#C89B3C;
+
+}
+
+nav ul{
+
+display:flex;
+
+list-style:none;
+
+gap:35px;
+
+}
+
+nav ul li a{
+
+color:white;
+
+text-decoration:none;
+
+font-weight:500;
+
+transition:.3s;
+
+}
+
+nav ul li a:hover,
+nav ul li a.active{
+
+color:#C89B3C;
+
+}
+
+/* ===========================
+PAGE TITLE
+=========================== */
+
+.notification-section{
+
+padding:60px 8%;
+
+}
+
+.title{
+
+text-align:center;
+
+margin-bottom:40px;
+
+}
+
+.title h1{
+
+font-size:40px;
+
+color:white;
+
+margin-bottom:10px;
+
+}
+
+.title h1 i{
+
+color:#C89B3C;
+
+margin-right:10px;
+
+}
+
+.title p{
+
+color:#ddd;
+
+font-size:17px;
+
+}
+
+/* ===========================
+NOTIFICATION CONTAINER
+=========================== */
+
+.notification-container{
+
+max-width:950px;
+
+margin:auto;
+
+display:flex;
+
+flex-direction:column;
+
+gap:20px;
+
+}
+
+/* ===========================
+NOTIFICATION CARD
+=========================== */
+
+.notification-card{
+
+display:flex;
+
+align-items:center;
+
+gap:20px;
+
+background:white;
+
+padding:22px;
+
+border-radius:18px;
+
+box-shadow:0 12px 30px rgba(0,0,0,.15);
+
+transition:.35s;
+
+cursor:pointer;
+
+animation:fadeUp .6s ease;
+
+}
+
+.notification-card:hover{
+
+transform:translateY(-6px);
+
+box-shadow:0 18px 40px rgba(0,0,0,.25);
+
+}
+
+/* ===========================
+ICON
+=========================== */
+
+.notification-card .icon{
+
+width:70px;
+
+height:70px;
+
+border-radius:50%;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+font-size:28px;
+
+color:white;
+
+flex-shrink:0;
+
+}
+
+/* ===========================
+CONTENT
+=========================== */
+
+.notification-card .content{
+
+flex:1;
+
+}
+
+.notification-card .content h3{
+
+font-size:22px;
+
+color:#081b29;
+
+margin-bottom:6px;
+
+}
+
+.notification-card .content p{
+
+font-size:15px;
+
+color:#666;
+
+line-height:1.6;
+
+margin-bottom:8px;
+
+}
+
+.notification-card .content span{
+
+font-size:13px;
+
+color:#999;
+
+font-weight:500;
+
+}
+
+/* ===========================
+CARD COLORS
+=========================== */
+
+.success .icon{
+
+background:#28a745;
+
+}
+
+.payment .icon{
+
+background:#0d6efd;
+
+}
+
+.ready .icon{
+
+background:#17a2b8;
+
+}
+
+.reminder .icon{
+
+background:#ffc107;
+
+color:#222;
+
+}
+
+.offer .icon{
+
+background:#e83e8c;
+
+}
+
+.review .icon{
+
+background:#fd7e14;
+
+}
+
+/* ===========================
+ANIMATION
+=========================== */
+
+@keyframes fadeUp{
+
+from{
+
+opacity:0;
+
+transform:translateY(30px);
+
+}
+
+to{
+
+opacity:1;
+
+transform:translateY(0);
+
+}
+
+}
+
+/* ===========================
+RESPONSIVE DESIGN
+=========================== */
+
+@media(max-width:768px){
+
+nav{
+
+flex-direction:column;
+
+gap:20px;
+
+padding:20px;
+
+}
+
+nav ul{
+
+flex-wrap:wrap;
+
+justify-content:center;
+
+gap:18px;
+
+}
+
+.title h1{
+
+font-size:32px;
+
+}
+
+.title p{
+
+font-size:15px;
+
+}
+
+.notification-card{
+
+flex-direction:column;
+
+align-items:flex-start;
+
+text-align:left;
+
+padding:20px;
+
+}
+
+.notification-card .icon{
+
+width:60px;
+
+height:60px;
+
+font-size:24px;
+
+}
+
+.notification-card .content h3{
+
+font-size:20px;
+
+}
+
+.notification-card .content p{
+
+font-size:14px;
+
+}
+
+}
+
+/* ===========================
+CUSTOM SCROLLBAR
+=========================== */
+
+::-webkit-scrollbar{
+
+width:10px;
+
+}
+
+::-webkit-scrollbar-track{
+
+background:#081b29;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+background:#C89B3C;
+
+border-radius:20px;
+
+}
+
+::-webkit-scrollbar-thumb:hover{
+
+background:#d4af37;
+
+}
+
+/* ===========================
+TEXT SELECTION
+=========================== */
+
+::selection{
+
+background:#C89B3C;
+
+color:white;
+
+}
+
+/* ===========================
+FOOTER
+=========================== */
+
+footer{
+
+margin-top:50px;
+
+background:#06131d;
+
+padding:20px;
+
+text-align:center;
+
+color:white;
+
+font-size:14px;
+
+}
+
+footer span{
+
+color:#C89B3C;
+
+font-weight:600;
+
+}
+
+/* ===========================
+SMOOTH TRANSITIONS
+=========================== */
+
+a,
+button,
+.notification-card,
+.icon{
+
+transition:all .3s ease;
+
+}
+
+/* ===========================
+CARD BORDER EFFECT
+=========================== */
+
+.notification-card{
+
+border-left:6px solid transparent;
+
+}
+
+.success{
+
+border-left-color:#28a745;
+
+}
+
+.payment{
+
+border-left-color:#0d6efd;
+
+}
+
+.ready{
+
+border-left-color:#17a2b8;
+
+}
+
+.reminder{
+
+border-left-color:#ffc107;
+
+}
+
+.offer{
+
+border-left-color:#e83e8c;
+
+}
+
+.review{
+
+border-left-color:#fd7e14;
+
+}
+
+/* ===========================
+PREMIUM HOVER GLOW
+=========================== */
+
+.notification-card:hover{
+
+background:#ffffff;
+
+box-shadow:0 20px 45px rgba(0,0,0,.25);
+
+}
