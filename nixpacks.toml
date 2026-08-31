@@ -2,4 +2,4 @@
 nixPkgs = ["php84", "php84Extensions.mysqli"]
 
 [start]
-cmd = "php -S 0.0.0.0:$PORT -t ."
+cmd = "php -S 0.0.0.0:$PORT"
