@@ -6,4 +6,4 @@ WORKDIR /app
 
 COPY . /app
 
-CMD ["frankenphp", "php-server", "--listen", ":$PORT", "--root", "/app"]
+CMD ["sh", "-c", "frankenphp php-server --listen :$PORT --root /app"]
