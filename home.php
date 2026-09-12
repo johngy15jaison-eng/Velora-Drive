@@ -2,8 +2,7 @@
 session_start();
 
 if(!isset($_SESSION['fullname'])){
-    header("Location: index.php");
-    exit();
+    $_SESSION['fullname'] = "Guest";
 }
 ?>
 
@@ -17,6 +16,7 @@ if(!isset($_SESSION['fullname'])){
 
 <title>Velora Drive | Home</title>
 
+<link rel="stylesheet" href="css/mobile.css">
 <link rel="stylesheet" href="css/home.css">
 
 </head>

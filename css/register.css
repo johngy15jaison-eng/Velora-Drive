@@ -4,719 +4,1330 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
+
 /* ==========================================
    RESET
 ========================================== */
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Poppins',sans-serif;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
 }
 
-body{
 
-    min-height:100vh;
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+}
 
-    display:flex;
 
-    justify-content:center;
+/* ==========================================
+   BODY
+========================================== */
 
-    align-items:center;
+body {
 
-    padding:35px;
+    min-height: 100vh;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    padding: 35px;
 
     background:
-    linear-gradient(rgba(4,15,35,.82),rgba(4,15,35,.82)),
+    linear-gradient(
+        rgba(4,15,35,.82),
+        rgba(4,15,35,.82)
+    ),
     url("../images/register-bg.jpg");
 
-    background-size:cover;
+    background-size: cover;
 
-    background-position:center;
+    background-position: center;
 
-    background-repeat:no-repeat;
+    background-repeat: no-repeat;
 
 }
+
 
 /* ==========================================
    MAIN CONTAINER
 ========================================== */
 
-.container{
+.container {
 
-    width:1350px;
+    width: 1350px;
 
-    max-width:100%;
+    max-width: 100%;
 
-    height:780px;
+    height: 780px;
 
-    display:flex;
+    display: flex;
 
-    overflow:hidden;
+    overflow: hidden;
 
-    border-radius:28px;
+    border-radius: 28px;
 
-    background:rgba(255,255,255,.10);
+    background: rgba(255,255,255,.10);
 
-    backdrop-filter:blur(18px);
+    backdrop-filter: blur(18px);
 
-    -webkit-backdrop-filter:blur(18px);
+    -webkit-backdrop-filter: blur(18px);
 
-    box-shadow:0 20px 60px rgba(0,0,0,.45);
+    box-shadow: 0 20px 60px rgba(0,0,0,.45);
 
 }
+
 
 /* ==========================================
    LEFT PANEL
 ========================================== */
 
-.left{
+.left {
 
-    width:55%;
+    width: 55%;
 
-    position:relative;
+    position: relative;
 
-    background:rgba(20,32,51,.88);
+    background: rgba(20,32,51,.88);
 
-    color:#fff;
+    color: #fff;
 
-    display:flex;
+    display: flex;
 
-    align-items:center;
+    align-items: center;
 
-    padding:70px;
-
-}
-
-.overlay{
-
-    position:absolute;
-
-    top:0;
-    left:0;
-
-    width:100%;
-    height:100%;
-
-    background:rgba(0,0,0,.08);
+    padding: 70px;
 
 }
 
-.content{
 
-    position:relative;
+.overlay {
 
-    z-index:10;
+    position: absolute;
 
-}
+    top: 0;
+    left: 0;
 
-.content h1{
+    width: 100%;
+    height: 100%;
 
-    font-size:48px;
-
-    font-weight:700;
-
-    margin-bottom:35px;
-
-    color:#fff;
+    background: rgba(0,0,0,.08);
 
 }
 
-.content h1 span{
 
-    color:#d8aa35;
+.content {
 
-}
+    position: relative;
 
-.content h2{
-
-    font-size:42px;
-
-    font-weight:700;
-
-    line-height:1.3;
-
-    margin-bottom:20px;
+    z-index: 10;
 
 }
 
-.content p{
 
-    font-size:17px;
+.content h1 {
 
-    line-height:1.8;
+    font-size: 48px;
 
-    color:#e7e7e7;
+    font-weight: 700;
 
-    margin-bottom:40px;
+    margin-bottom: 35px;
 
-    max-width:520px;
+    color: #fff;
 
 }
+
+
+.content h1 span {
+
+    color: #d8aa35;
+
+}
+
+
+.content h2 {
+
+    font-size: 42px;
+
+    font-weight: 700;
+
+    line-height: 1.3;
+
+    margin-bottom: 20px;
+
+}
+
+
+.content p {
+
+    font-size: 17px;
+
+    line-height: 1.8;
+
+    color: #e7e7e7;
+
+    margin-bottom: 40px;
+
+    max-width: 520px;
+
+}
+
 
 /* ==========================================
    FEATURES
 ========================================== */
 
-.features{
+.features {
 
-    display:grid;
+    display: grid;
 
-    grid-template-columns:1fr 1fr;
+    grid-template-columns: 1fr 1fr;
 
-    gap:20px;
-
-}
-
-.features div{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:14px;
-
-    font-size:17px;
-
-    font-weight:500;
+    gap: 20px;
 
 }
 
-.features i{
 
-    width:42px;
+.features div {
 
-    height:42px;
+    display: flex;
 
-    border-radius:50%;
+    align-items: center;
 
-    background:#d8aa35;
+    gap: 14px;
 
-    color:#162334;
+    font-size: 17px;
 
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    font-size:16px;
+    font-weight: 500;
 
 }
+
+
+.features i {
+
+    width: 42px;
+
+    height: 42px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: #d8aa35;
+
+    color: #162334;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    font-size: 16px;
+
+}
+
 
 /* ==========================================
    RIGHT PANEL
 ========================================== */
 
-.right{
+.right {
 
-    width:45%;
+    width: 45%;
 
-    background:#ffffff;
+    background: #ffffff;
 
-    display:flex;
+    display: flex;
 
-    justify-content:center;
+    justify-content: center;
 
-    align-items:center;
+    align-items: center;
 
-    padding:60px;
+    padding: 60px;
 
 }
+
 
 /* ==========================================
    REGISTER BOX
 ========================================== */
 
-.register-box{
+.register-box {
 
-    width:100%;
+    width: 100%;
 
-    max-width:420px;
+    max-width: 420px;
 
-}
-
-.register-box h2{
-
-    font-size:38px;
-
-    font-weight:700;
-
-    color:#162334;
-
-    margin-bottom:8px;
+    animation: fadeIn .6s ease;
 
 }
 
-.subtitle{
 
-    font-size:16px;
+.register-box h2 {
 
-    color:#777;
+    font-size: 38px;
 
-    margin-bottom:30px;
+    font-weight: 700;
+
+    color: #162334;
+
+    margin-bottom: 8px;
 
 }
+
+
+.subtitle {
+
+    font-size: 16px;
+
+    color: #777;
+
+    margin-bottom: 30px;
+
+}
+
 
 /* ==========================================
    FORM
 ========================================== */
 
-form{
+form {
 
-    display:flex;
+    display: flex;
 
-    flex-direction:column;
+    flex-direction: column;
 
-}
-
-label{
-
-    font-size:15px;
-
-    font-weight:600;
-
-    color:#333;
-
-    margin-bottom:8px;
-
-    margin-top:16px;
+    width: 100%;
 
 }
 
-input{
 
-    width:100%;
+label {
 
-    height:52px;
+    font-size: 15px;
 
-    border:2px solid #e4e4e4;
+    font-weight: 600;
 
-    border-radius:12px;
+    color: #333;
 
-    padding:0 18px;
+    margin-bottom: 8px;
 
-    font-size:15px;
-
-    outline:none;
-
-    transition:.3s;
+    margin-top: 16px;
 
 }
 
-input:focus{
 
-    border-color:#d8aa35;
+input {
 
-    box-shadow:0 0 10px rgba(216,170,53,.18);
+    width: 100%;
+
+    height: 52px;
+
+    border: 2px solid #e4e4e4;
+
+    border-radius: 12px;
+
+    padding: 0 18px;
+
+    font-size: 15px;
+
+    outline: none;
+
+    transition: .3s;
 
 }
+
+
+input:focus {
+
+    border-color: #d8aa35;
+
+    box-shadow: 0 0 10px rgba(216,170,53,.18);
+
+}
+
+
+input:hover {
+
+    border-color: #cfcfcf;
+
+}
+
 
 /* ==========================================
    PASSWORD
 ========================================== */
 
-.password-wrapper{
+.password-wrapper {
 
-    position:relative;
+    position: relative;
 
-}
-
-.password-wrapper input{
-
-    padding-right:55px;
+    width: 100%;
 
 }
 
-.password-toggle{
 
-    position:absolute;
+.password-wrapper input {
 
-    top:50%;
-
-    right:18px;
-
-    transform:translateY(-50%);
-
-    cursor:pointer;
-
-    color:#777;
-
-    font-size:17px;
+    padding-right: 55px;
 
 }
 
-.password-toggle:hover{
 
-    color:#d8aa35;
+.password-toggle {
+
+    position: absolute;
+
+    top: 50%;
+
+    right: 18px;
+
+    transform: translateY(-50%);
+
+    cursor: pointer;
+
+    color: #777;
+
+    font-size: 17px;
 
 }
+
+
+.password-toggle:hover {
+
+    color: #d8aa35;
+
+}
+
 
 /* ==========================================
    PASSWORD STRENGTH
 ========================================== */
 
-.strength{
+.strength {
 
-    margin-top:18px;
+    margin-top: 18px;
 
-}
-
-.strength-head{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    font-size:14px;
-
-    margin-bottom:8px;
+    width: 100%;
 
 }
 
-#strengthText{
 
-    font-weight:600;
+.strength-head {
 
-    color:#ff3b30;
+    display: flex;
 
-}
+    justify-content: space-between;
 
-.strength-bar{
+    align-items: center;
 
-    width:100%;
+    font-size: 14px;
 
-    height:8px;
-
-    background:#ececec;
-
-    border-radius:30px;
-
-    overflow:hidden;
+    margin-bottom: 8px;
 
 }
 
-#strengthFill{
 
-    width:20%;
+#strengthText {
 
-    height:100%;
+    font-weight: 600;
 
-    background:#ff3b30;
-
-    transition:.35s;
+    color: #ff3b30;
 
 }
+
+
+.strength-bar {
+
+    width: 100%;
+
+    height: 8px;
+
+    background: #ececec;
+
+    border-radius: 30px;
+
+    overflow: hidden;
+
+}
+
+
+#strengthFill {
+
+    width: 20%;
+
+    height: 100%;
+
+    background: #ff3b30;
+
+    transition: .35s;
+
+}
+
 
 /* ==========================================
    BUTTON
 ========================================== */
 
-button{
+button {
 
-    width:100%;
+    width: 100%;
 
-    height:54px;
+    height: 54px;
 
-    margin-top:28px;
+    margin-top: 28px;
 
-    border:none;
+    border: none;
 
-    border-radius:12px;
+    border-radius: 12px;
 
-    background:#0d1b2a;
+    background: #0d1b2a;
 
-    color:#fff;
+    color: #fff;
 
-    font-size:17px;
+    font-size: 17px;
 
-    font-weight:600;
+    font-weight: 600;
 
-    cursor:pointer;
+    cursor: pointer;
 
-    transition:.3s;
+    transition: .3s;
+
+}
+
+
+button:hover {
+
+    background: #d8aa35;
+
+    color: #111;
 
 }
 
-button:hover{
 
-    background:#d8aa35;
+button:active {
 
-    color:#111;
+    transform: scale(.98);
 
 }
+
 
 /* ==========================================
    LOGIN LINK
 ========================================== */
 
-.login-link{
+.login-link {
 
-    margin-top:22px;
+    margin-top: 22px;
 
-    text-align:center;
+    text-align: center;
 
-    font-size:15px;
+    font-size: 15px;
 
-    color:#666;
+    color: #666;
 
-}
-
-.login-link a{
-
-    color:#d8aa35;
-
-    text-decoration:none;
-
-    font-weight:600;
+    line-height: 1.5;
 
 }
 
-.login-link a:hover{
 
-    text-decoration:underline;
+.login-link a {
+
+    color: #d8aa35;
+
+    text-decoration: none;
+
+    font-weight: 600;
 
 }
+
+
+.login-link a:hover {
+
+    text-decoration: underline;
+
+}
+
 
 /* ==========================================
-   HOVER EFFECTS
-========================================== */
-
-input:hover{
-
-    border-color:#cfcfcf;
-
-}
-
-button:active{
-
-    transform:scale(.98);
-
-}
-
-/* ==========================================
-   INPUT PLACEHOLDER
-========================================== */
-
-input::placeholder{
-
-    color:#999;
-
-}
-
-/* ==========================================
-   SMOOTH ANIMATION
-========================================== */
-
-.register-box{
-
-    animation:fadeIn .6s ease;
-
-}
-
-@keyframes fadeIn{
-
-    from{
-
-        opacity:0;
-        transform:translateY(25px);
-
-    }
-
-    to{
-
-        opacity:1;
-        transform:translateY(0);
-
-    }
-
-}
-
-/* ==========================================
-   REMOVE MOBILE TAP COLOR
+   TAP COLOR
 ========================================== */
 
 button,
 input,
-a{
+a {
 
-    -webkit-tap-highlight-color:transparent;
+    -webkit-tap-highlight-color: transparent;
 
 }
 
+
 /* ==========================================
-   TABLET
+   ANIMATION
 ========================================== */
 
-@media(max-width:1100px){
+@keyframes fadeIn {
 
-.container{
+    from {
 
-    flex-direction:column;
+        opacity: 0;
 
-    height:auto;
+        transform: translateY(25px);
 
-}
+    }
 
-.left,
-.right{
+    to {
 
-    width:100%;
+        opacity: 1;
 
-}
+        transform: translateY(0);
 
-.left{
-
-    text-align:center;
-
-    padding:50px;
+    }
 
 }
 
-.features{
 
-    grid-template-columns:1fr;
+/* =====================================================
+   TABLET / iPAD
+   768px - 1024px
+===================================================== */
 
-    justify-items:center;
+@media (min-width: 768px) and (max-width: 1024px) {
+
+    body {
+
+        padding: 20px;
+
+    }
+
+
+    .container {
+
+        width: 100%;
+
+        max-width: 950px;
+
+        height: 700px;
+
+        flex-direction: row;
+
+        border-radius: 24px;
+
+    }
+
+
+    .left {
+
+        width: 50%;
+
+        padding: 45px;
+
+    }
+
+
+    .right {
+
+        width: 50%;
+
+        padding: 35px;
+
+    }
+
+
+    .content h1 {
+
+        font-size: 38px;
+
+        margin-bottom: 25px;
+
+    }
+
+
+    .content h2 {
+
+        font-size: 30px;
+
+        margin-bottom: 16px;
+
+    }
+
+
+    .content p {
+
+        font-size: 14px;
+
+        line-height: 1.7;
+
+        margin-bottom: 30px;
+
+    }
+
+
+    .features {
+
+        grid-template-columns: 1fr 1fr;
+
+        gap: 14px;
+
+    }
+
+
+    .features div {
+
+        font-size: 13px;
+
+        gap: 8px;
+
+    }
+
+
+    .features i {
+
+        width: 35px;
+
+        height: 35px;
+
+        font-size: 13px;
+
+    }
+
+
+    .register-box {
+
+        max-width: 390px;
+
+    }
+
+
+    .register-box h2 {
+
+        font-size: 32px;
+
+    }
+
+
+    input {
+
+        height: 50px;
+
+        font-size: 14px;
+
+    }
+
+
+    button {
+
+        height: 52px;
+
+        font-size: 16px;
+
+    }
 
 }
 
-.content h1{
 
-    font-size:42px;
-
-}
-
-.content h2{
-
-    font-size:34px;
-
-}
-
-.right{
-
-    padding:40px;
-
-}
-
-.register-box{
-
-    max-width:100%;
-
-}
-
-}
-
-/* ==========================================
+/* =====================================================
    MOBILE
-========================================== */
+   Below 768px
+===================================================== */
 
-@media(max-width:650px){
+@media (max-width: 767px) {
 
-body{
+    html,
+    body {
 
-    padding:15px;
+        width: 100%;
+
+        max-width: 100%;
+
+        min-width: 0;
+
+        overflow-x: hidden;
+
+    }
+
+
+    body {
+
+        min-height: 100vh;
+
+        padding: 0;
+
+        display: block;
+
+    }
+
+
+    /* MAIN CONTAINER */
+
+    .container {
+
+        width: 100% !important;
+
+        max-width: 100% !important;
+
+        min-width: 0 !important;
+
+        min-height: 100vh;
+
+        height: auto !important;
+
+        margin: 0;
+
+        display: flex;
+
+        flex-direction: column;
+
+        border-radius: 0 !important;
+
+        overflow: hidden;
+
+    }
+
+
+    /* ==========================================
+       LEFT PANEL
+    ========================================== */
+
+    .left {
+
+        width: 100% !important;
+
+        min-width: 0;
+
+        padding: 32px 20px !important;
+
+        text-align: center;
+
+        display: flex;
+
+        justify-content: center;
+
+        align-items: center;
+
+    }
+
+
+    .content {
+
+        width: 100%;
+
+        max-width: 500px;
+
+    }
+
+
+    .content h1 {
+
+        font-size: 31px;
+
+        line-height: 1.2;
+
+        margin-bottom: 18px;
+
+    }
+
+
+    .content h2 {
+
+        font-size: 24px;
+
+        line-height: 1.3;
+
+        margin-bottom: 12px;
+
+    }
+
+
+    .content p {
+
+        max-width: 470px;
+
+        margin: 0 auto 24px;
+
+        font-size: 13px;
+
+        line-height: 1.6;
+
+    }
+
+
+    /* ==========================================
+       FEATURES
+    ========================================== */
+
+    .features {
+
+        width: 100%;
+
+        display: grid;
+
+        grid-template-columns: 1fr 1fr;
+
+        gap: 12px;
+
+    }
+
+
+    .features div {
+
+        min-width: 0;
+
+        display: flex;
+
+        justify-content: center;
+
+        align-items: center;
+
+        gap: 7px;
+
+        font-size: 12px;
+
+        text-align: center;
+
+    }
+
+
+    .features i {
+
+        width: 32px;
+
+        height: 32px;
+
+        font-size: 12px;
+
+    }
+
+
+    /* ==========================================
+       RIGHT PANEL
+    ========================================== */
+
+    .right {
+
+        width: 100% !important;
+
+        min-width: 0;
+
+        padding: 28px 16px !important;
+
+        display: flex;
+
+        justify-content: center;
+
+        align-items: flex-start;
+
+    }
+
+
+    /* ==========================================
+       REGISTER BOX
+    ========================================== */
+
+    .register-box {
+
+        width: 100% !important;
+
+        max-width: 500px;
+
+        margin: 0 auto;
+
+    }
+
+
+    .register-box h2 {
+
+        font-size: 28px;
+
+        text-align: center;
+
+        margin-bottom: 8px;
+
+    }
+
+
+    /* ==========================================
+       FORM
+    ========================================== */
+
+    form {
+
+        width: 100%;
+
+        max-width: 100%;
+
+    }
+
+
+    label {
+
+        width: 100%;
+
+        font-size: 13px;
+
+        margin-top: 14px;
+
+        margin-bottom: 7px;
+
+    }
+
+
+    input {
+
+        width: 100% !important;
+
+        max-width: 100% !important;
+
+        min-width: 0 !important;
+
+        height: 48px;
+
+        padding: 0 14px;
+
+        font-size: 14px;
+
+        border-radius: 11px;
+
+    }
+
+
+    /* ==========================================
+       PASSWORD
+    ========================================== */
+
+    .password-wrapper {
+
+        width: 100%;
+
+        max-width: 100%;
+
+        position: relative;
+
+    }
+
+
+    .password-wrapper input {
+
+        width: 100% !important;
+
+        padding-right: 48px !important;
+
+    }
+
+
+    .password-toggle {
+
+        right: 15px;
+
+        font-size: 16px;
+
+    }
+
+
+    /* ==========================================
+       STRENGTH
+    ========================================== */
+
+    .strength {
+
+        width: 100%;
+
+        margin-top: 14px;
+
+    }
+
+
+    .strength-head {
+
+        width: 100%;
+
+        display: flex;
+
+        justify-content: space-between;
+
+        align-items: center;
+
+        gap: 10px;
+
+        font-size: 12px;
+
+    }
+
+
+    .strength-bar {
+
+        width: 100%;
+
+    }
+
+
+    /* ==========================================
+       BUTTON
+    ========================================== */
+
+    button {
+
+        width: 100% !important;
+
+        max-width: 100% !important;
+
+        height: 50px;
+
+        margin-top: 24px;
+
+        font-size: 15px;
+
+        border-radius: 11px;
+
+    }
+
+
+    /* ==========================================
+       LOGIN LINK
+    ========================================== */
+
+    .login-link {
+
+        width: 100%;
+
+        margin-top: 19px;
+
+        font-size: 12px;
+
+        line-height: 1.6;
+
+        text-align: center;
+
+    }
+
+
+    .login-link a {
+
+        white-space: nowrap;
+
+    }
 
 }
 
-.container{
 
-    border-radius:20px;
+/* =====================================================
+   SMALL PHONES
+   Below 480px
+===================================================== */
+
+@media (max-width: 480px) {
+
+    .left {
+
+        padding: 28px 15px !important;
+
+    }
+
+
+    .content h1 {
+
+        font-size: 28px;
+
+    }
+
+
+    .content h2 {
+
+        font-size: 21px;
+
+    }
+
+
+    .content p {
+
+        font-size: 12px;
+
+        line-height: 1.55;
+
+        margin-bottom: 20px;
+
+    }
+
+
+    .features {
+
+        gap: 9px;
+
+    }
+
+
+    .features div {
+
+        font-size: 10px;
+
+        gap: 5px;
+
+    }
+
+
+    .features i {
+
+        width: 30px;
+
+        height: 30px;
+
+        font-size: 11px;
+
+    }
+
+
+    .right {
+
+        padding: 24px 12px !important;
+
+    }
+
+
+    .register-box {
+
+        padding: 0 4px;
+
+    }
+
+
+    .register-box h2 {
+
+        font-size: 25px;
+
+    }
+
+
+    label {
+
+        font-size: 12px;
+
+    }
+
+
+    input {
+
+        height: 47px;
+
+        font-size: 13px;
+
+        padding: 0 13px;
+
+    }
+
+
+    button {
+
+        height: 48px;
+
+        font-size: 14px;
+
+    }
+
+
+    .login-link {
+
+        font-size: 12px;
+
+    }
 
 }
 
-.left{
 
-    padding:35px 25px;
+/* =====================================================
+   VERY SMALL PHONES
+   Below 360px
+===================================================== */
 
-}
+@media (max-width: 359px) {
 
-.content h1{
+    .left {
 
-    font-size:34px;
+        padding: 24px 10px !important;
 
-}
+    }
 
-.content h2{
 
-    font-size:28px;
+    .content h1 {
 
-}
+        font-size: 25px;
 
-.content p{
+    }
 
-    font-size:15px;
 
-}
+    .content h2 {
 
-.features div{
+        font-size: 19px;
 
-    font-size:15px;
+    }
 
-}
 
-.features i{
+    .content p {
 
-    width:36px;
-    height:36px;
+        font-size: 11px;
 
-    font-size:14px;
+    }
 
-}
 
-.right{
+    .features {
 
-    padding:30px 20px;
+        gap: 7px;
 
-}
+    }
 
-.register-box h2{
 
-    font-size:30px;
+    .features div {
 
-}
+        font-size: 9px;
 
-label{
+    }
 
-    font-size:14px;
 
-}
+    .features i {
 
-input{
+        width: 27px;
 
-    height:48px;
+        height: 27px;
 
-    font-size:14px;
+        font-size: 10px;
 
-}
+    }
 
-button{
 
-    height:50px;
+    .right {
 
-    font-size:15px;
+        padding: 20px 9px !important;
 
-}
+    }
 
-.login-link{
 
-    font-size:14px;
+    .register-box h2 {
+
+        font-size: 23px;
+
+    }
 
 }
 
-}
 
-/* ==========================================
-   LARGE SCREEN
-========================================== */
+/* =====================================================
+   LARGE SCREENS
+   1600px+
+===================================================== */
 
-@media(min-width:1600px){
+@media (min-width: 1600px) {
 
-.container{
+    .container {
 
-    width:1450px;
+        width: 1450px;
 
-}
+    }
 
 }

@@ -1,0 +1,389 @@
+/* =====================================================
+   VELORA DRIVE
+   GLOBAL RESPONSIVE DESIGN
+   Phones + Tablets + iPads + Laptops
+   ===================================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+/* -----------------------------------------------------
+   MEDIA
+   ----------------------------------------------------- */
+
+img,
+video,
+iframe {
+    max-width: 100%;
+}
+
+img {
+    height: auto;
+}
+
+video,
+iframe {
+    width: 100%;
+}
+
+/* -----------------------------------------------------
+   FORM CONTROLS
+   ----------------------------------------------------- */
+
+input,
+select,
+textarea,
+button {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+input,
+select,
+textarea {
+    min-width: 0;
+}
+
+/* -----------------------------------------------------
+   TABLES
+   ----------------------------------------------------- */
+
+table {
+    max-width: 100%;
+}
+
+.table-container,
+.table-wrapper,
+.table-responsive {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* =====================================================
+   TABLETS / iPADS
+   768px - 1024px
+   ===================================================== */
+
+@media (min-width: 768px) and (max-width: 1024px) {
+
+    body {
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    /* Keep page content inside the screen */
+    .content,
+    .section,
+    .wrapper,
+    .main-container,
+    .page-container,
+    .content-container {
+        max-width: 94%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Responsive images */
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* Forms */
+    input,
+    select,
+    textarea {
+        max-width: 100%;
+    }
+
+    /* Prevent flex children from becoming wider than screen */
+    .row,
+    .flex,
+    .content-row {
+        max-width: 100%;
+    }
+
+    /* Navigation */
+    nav {
+        max-width: 100%;
+    }
+
+    nav ul {
+        flex-wrap: wrap;
+    }
+}
+
+/* =====================================================
+   MOBILE
+   Below 768px
+   ===================================================== */
+
+@media (max-width: 767px) {
+
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    body {
+        font-size: 14px;
+    }
+
+    /* -------------------------------------------------
+       NAVIGATION
+       ------------------------------------------------- */
+
+    nav {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    nav ul {
+        max-width: 100%;
+        flex-wrap: wrap;
+    }
+
+    /* -------------------------------------------------
+       GENERAL CONTENT
+       ------------------------------------------------- */
+
+    .content,
+    .section,
+    .wrapper,
+    .main-container,
+    .page-container,
+    .content-container {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    /* -------------------------------------------------
+       FLEX / GRID
+       ------------------------------------------------- */
+
+    .row,
+    .flex,
+    .content-row {
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    /* Flex children are allowed to shrink */
+    .row > *,
+    .flex > *,
+    .content-row > * {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    /* -------------------------------------------------
+       TEXT
+       ------------------------------------------------- */
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    a,
+    label {
+        max-width: 100%;
+        overflow-wrap: break-word;
+    }
+
+    /* Don't split normal words letter-by-letter */
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        word-break: normal;
+    }
+
+    /* -------------------------------------------------
+       IMAGES
+       ------------------------------------------------- */
+
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* -------------------------------------------------
+       FORMS
+       ------------------------------------------------- */
+
+    form {
+        max-width: 100%;
+    }
+
+    input,
+    select,
+    textarea {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    button {
+        max-width: 100%;
+    }
+
+    /* -------------------------------------------------
+       CARDS
+       ------------------------------------------------- */
+
+    .card,
+    .box,
+    .panel {
+        max-width: 100%;
+    }
+
+    /* -------------------------------------------------
+       TABLES
+       ------------------------------------------------- */
+
+    table {
+        max-width: 100%;
+    }
+
+    /* -------------------------------------------------
+       LARGE FIXED ELEMENTS
+       ------------------------------------------------- */
+
+    [style*="width: 1000px"],
+    [style*="width: 900px"],
+    [style*="width: 800px"] {
+        max-width: 100% !important;
+    }
+}
+
+/* =====================================================
+   LARGE PHONES
+   480px - 767px
+   ===================================================== */
+
+@media (min-width: 480px) and (max-width: 767px) {
+
+    body {
+        font-size: 14px;
+    }
+
+    h1 {
+        font-size: 32px;
+    }
+
+    h2 {
+        font-size: 25px;
+    }
+
+    h3 {
+        font-size: 21px;
+    }
+
+    .content,
+    .section,
+    .wrapper,
+    .main-container,
+    .page-container,
+    .content-container {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+}
+
+/* =====================================================
+   SMALL PHONES
+   320px - 479px
+   ===================================================== */
+
+@media (max-width: 479px) {
+
+    body {
+        font-size: 14px;
+    }
+
+    h1 {
+        font-size: 28px;
+    }
+
+    h2 {
+        font-size: 23px;
+    }
+
+    h3 {
+        font-size: 19px;
+    }
+
+    .content,
+    .section,
+    .wrapper,
+    .main-container,
+    .page-container,
+    .content-container {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    nav {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    nav ul {
+        gap: 8px 14px;
+    }
+
+    input,
+    select,
+    textarea {
+        font-size: 14px;
+    }
+}
+
+/* =====================================================
+   VERY SMALL PHONES
+   320px - 359px
+   ===================================================== */
+
+@media (max-width: 359px) {
+
+    body {
+        font-size: 13px;
+    }
+
+    h1 {
+        font-size: 25px;
+    }
+
+    h2 {
+        font-size: 21px;
+    }
+
+    h3 {
+        font-size: 18px;
+    }
+}
