@@ -16,8 +16,8 @@ if(!isset($_SESSION['fullname'])){
 
 <title>Velora Drive | Home</title>
 
-<link rel="stylesheet" href="css/mobile.css">
-<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/mobile.css?v=2001">
+<link rel="stylesheet" href="css/home.css?v=2001">
 
 </head>
 

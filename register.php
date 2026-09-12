@@ -9,8 +9,8 @@
 
 <title>Velora Drive | Register</title>
 
-<link rel="stylesheet" href="css/mobile.css">
-<link rel="stylesheet" href="css/register.css">
+<link rel="stylesheet" href="css/mobile.css?v=2001">
+<link rel="stylesheet" href="css/register.css?v=2001">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 
