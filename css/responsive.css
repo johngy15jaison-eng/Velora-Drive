@@ -1,0 +1,611 @@
+/* =========================================================
+   VELORA DRIVE - GLOBAL RESPONSIVE CSS
+   Phones + Tablets/iPads
+   Load this file LAST on every page.
+   Desktop (1025px+) is intentionally untouched.
+   ========================================================= */
+
+html {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+/* Prevent common elements from creating horizontal overflow */
+img,
+video,
+iframe,
+svg,
+canvas {
+    max-width: 100%;
+}
+
+img {
+    height: auto;
+}
+
+input,
+select,
+textarea,
+button {
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+table {
+    max-width: 100%;
+}
+
+a,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+label,
+span {
+    overflow-wrap: break-word;
+}
+
+/* =========================================================
+   TABLETS / iPADS: 768px - 1024px
+   ========================================================= */
+
+@media (min-width: 768px) and (max-width: 1024px) {
+
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    /* ---------------- NAVIGATION ---------------- */
+
+    nav,
+    .navbar {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    nav ul,
+    .nav-links {
+        max-width: 100%;
+        flex-wrap: wrap;
+        min-width: 0;
+    }
+
+    nav ul li,
+    .nav-links li {
+        min-width: 0;
+    }
+
+    nav ul li a,
+    .nav-links a {
+        white-space: nowrap;
+        max-width: 100%;
+    }
+
+    .nav-container {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* ---------------- COMMON CONTAINERS ---------------- */
+
+    .container,
+    .main-container,
+    .page-container,
+    .content-container,
+    .wrapper,
+    .section-container,
+    .booking-page,
+    .payment-container,
+    .success-page,
+    .edit-container,
+    .password-section,
+    .notification-section,
+    .profile-hero,
+    .dashboard {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    /* ---------------- FLEX / GRID ---------------- */
+
+    .container > *,
+    .row > *,
+    .content-row > *,
+    .nav-container > * {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    /* Let major two-column layouts become single column
+       when they cannot comfortably fit on a tablet. */
+    .booking-page,
+    .payment-container {
+        grid-template-columns: 1fr;
+    }
+
+    .mission {
+        grid-template-columns: 1fr;
+    }
+
+    .choose-grid,
+    .stats,
+    .dashboard {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* ---------------- MEDIA ---------------- */
+
+    .vehicle-image img,
+    .vehicle-section img,
+    .booking-card img,
+    .profile-image img,
+    .profile-preview img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* ---------------- FORMS ---------------- */
+
+    form {
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    input,
+    select,
+    textarea {
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    /* ---------------- TABLES ---------------- */
+
+    .table-container,
+    .table-wrapper,
+    .table-responsive {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* =========================================================
+   PHONES: 0 - 767px
+   ========================================================= */
+
+@media (max-width: 767px) {
+
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        overflow-x: hidden;
+    }
+
+    body {
+        font-size: 14px;
+    }
+
+    /* =====================================================
+       NAVIGATION
+       Supports:
+       nav
+       .navbar
+       .nav-container
+       .nav-links
+       ===================================================== */
+
+    nav,
+    .navbar {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    .nav-container {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    nav ul,
+    .nav-links {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 8px 12px;
+    }
+
+    nav ul li,
+    .nav-links li {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    nav ul li a,
+    .nav-links a {
+        display: inline-block;
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .logo {
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* =====================================================
+       COMMON CONTAINERS
+       ===================================================== */
+
+    .container,
+    .main-container,
+    .page-container,
+    .content-container,
+    .wrapper,
+    .section-container,
+    .booking-page,
+    .payment-container,
+    .success-page,
+    .edit-container,
+    .password-section,
+    .notification-section,
+    .profile-hero,
+    .dashboard,
+    .about,
+    .mission,
+    .choose,
+    .stats,
+    .contact-section,
+    .faq-section {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    /* =====================================================
+       FLEX / GRID SAFETY
+       ===================================================== */
+
+    .container,
+    .row,
+    .content-row,
+    .flex,
+    .booking-page,
+    .payment-container {
+        min-width: 0;
+    }
+
+    .container > *,
+    .row > *,
+    .content-row > *,
+    .flex > *,
+    .booking-page > *,
+    .payment-container > * {
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Major layouts stack on phones */
+    .mission,
+    .choose-grid,
+    .stats,
+    .dashboard,
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .booking-page,
+    .payment-container {
+        grid-template-columns: 1fr;
+    }
+
+    /* Login/register style two-column containers */
+    .container {
+        max-width: 100%;
+    }
+
+    /* Do NOT force .left/.right to fixed widths.
+       Both sections may stack naturally. */
+    .left,
+    .right {
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* =====================================================
+       SECTIONS / CARDS
+       ===================================================== */
+
+    .card,
+    .box,
+    .panel,
+    .booking-card,
+    .notification-card,
+    .edit-card,
+    .password-card,
+    .register-box,
+    .profile-card {
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    /* =====================================================
+       IMAGES / VIDEO / MAPS
+       ===================================================== */
+
+    img,
+    video,
+    iframe {
+        max-width: 100%;
+    }
+
+    .vehicle-image,
+    .vehicle-image img,
+    .booking-card img,
+    .profile-image,
+    .profile-image img,
+    .profile-preview,
+    .profile-preview img,
+    .map,
+    .map iframe {
+        max-width: 100%;
+    }
+
+    /* Prevent fixed image dimensions from overflowing */
+    .vehicle-image img,
+    .booking-card img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+
+    /* =====================================================
+       FORMS
+       ===================================================== */
+
+    form {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    input,
+    select,
+    textarea {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    button {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* =====================================================
+       TABLES
+       ===================================================== */
+
+    table {
+        max-width: 100%;
+    }
+
+    .table-container,
+    .table-wrapper,
+    .table-responsive {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* =====================================================
+       TEXT
+       ===================================================== */
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    label {
+        max-width: 100%;
+        word-break: normal;
+        overflow-wrap: break-word;
+    }
+
+    /* Never force normal text to break character-by-character */
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    label {
+        word-break: normal !important;
+    }
+
+    /* =====================================================
+       COMMON HERO SECTIONS
+       ===================================================== */
+
+    .hero,
+    .profile-hero {
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    .hero-content,
+    .hero-content h1,
+    .hero-content p {
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    /* =====================================================
+       FIXED / OVERSIZED INLINE WIDTHS
+       ===================================================== */
+
+    [style*="width: 1350px"],
+    [style*="width: 1200px"],
+    [style*="width: 1000px"],
+    [style*="width: 950px"],
+    [style*="width: 900px"],
+    [style*="width: 850px"],
+    [style*="width: 800px"],
+    [style*="width: 700px"] {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+/* =========================================================
+   LARGE PHONES: 480px - 767px
+   ========================================================= */
+
+@media (min-width: 480px) and (max-width: 767px) {
+
+    nav,
+    .navbar {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    nav ul,
+    .nav-links {
+        gap: 8px 10px;
+    }
+
+    .logo {
+        font-size: 30px;
+    }
+
+    .hero-content h1 {
+        font-size: 38px;
+        line-height: 1.2;
+    }
+
+    .hero-content p {
+        font-size: 17px;
+    }
+}
+
+/* =========================================================
+   SMALL PHONES: 360px - 479px
+   ========================================================= */
+
+@media (min-width: 360px) and (max-width: 479px) {
+
+    nav,
+    .navbar {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    nav ul,
+    .nav-links {
+        gap: 7px 8px;
+    }
+
+    nav ul li a,
+    .nav-links a {
+        font-size: 13px;
+    }
+
+    .logo {
+        font-size: 27px;
+    }
+
+    .hero-content h1 {
+        font-size: 32px;
+        line-height: 1.2;
+    }
+
+    .hero-content p {
+        font-size: 16px;
+    }
+}
+
+/* =========================================================
+   VERY SMALL PHONES: BELOW 360px
+   ========================================================= */
+
+@media (max-width: 359px) {
+
+    body {
+        font-size: 13px;
+    }
+
+    nav,
+    .navbar {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    nav ul,
+    .nav-links {
+        gap: 5px 6px;
+    }
+
+    nav ul li a,
+    .nav-links a {
+        font-size: 11px;
+        padding-left: 7px;
+        padding-right: 7px;
+    }
+
+    .logo {
+        font-size: 24px;
+    }
+
+    .hero-content h1 {
+        font-size: 28px;
+    }
+
+    .hero-content p {
+        font-size: 15px;
+    }
+}

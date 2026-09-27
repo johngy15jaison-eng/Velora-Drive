@@ -33,7 +33,9 @@ $recent=mysqli_query($conn,"SELECT * FROM bookings WHERE email='$email' ORDER BY
 
 <title>Velora Drive | My Profile</title>
 
+<link rel="stylesheet" href="css/mobile.css">
 <link rel="stylesheet" href="css/profile.css">
+<link rel="stylesheet" href="css/responsive.css?v=3001">
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 

@@ -11,6 +11,7 @@
 
 <link rel="stylesheet" href="css/mobile.css?v=2001">
 <link rel="stylesheet" href="css/register.css?v=2001">
+<link rel="stylesheet" href="css/responsive.css?v=3001">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 

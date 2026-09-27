@@ -18,6 +18,7 @@ if(!isset($_SESSION['fullname'])){
 
 <link rel="stylesheet" href="css/mobile.css?v=2001">
 <link rel="stylesheet" href="css/home.css?v=2001">
+<link rel="stylesheet" href="css/responsive.css?v=3001">
 
 </head>
 

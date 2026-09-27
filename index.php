@@ -20,7 +20,7 @@ if(isset($_SESSION['error'])){
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/index.css">
+<link rel="stylesheet" href="css/index.css?v=2">
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
@@ -47,15 +47,23 @@ Velora <span>Drive</span>
 </div>
 
 <ul>
+
 <li><a href="#">Home</a></li>
+
 <li><a href="#">Vehicles</a></li>
+
 <li><a href="#">About</a></li>
+
 <li><a href="#">Contact</a></li>
+
 </ul>
 
-<a href="register.php" class="register-btn">Register</a>
+<a href="register.php" class="register-btn">
+Register
+</a>
 
 </nav>
+
 
 <div class="container">
 
@@ -67,13 +75,18 @@ Velora <span>Drive</span>
 Sign in to continue your premium vehicle rental experience.
 </p>
 
+
 <?php if($error!=""){ ?>
+
 <div class="error-message">
 <?php echo $error; ?>
 </div>
+
 <?php } ?>
 
+
 <form action="login_action.php" method="POST">
+
 
 <div class="input-group">
 
@@ -89,6 +102,7 @@ required>
 
 </div>
 
+
 <div class="input-group">
 
 <label>Password</label>
@@ -103,22 +117,38 @@ required>
 
 </div>
 
+
 <div class="options">
 
 <label>
+
 <input type="checkbox">
+
 Remember Me
+
 </label>
 
-<a href="#">Forgot Password?</a>
+
+<!-- FORGOT PASSWORD LINK -->
+
+<a href="forgot_password.php">
+Forgot Password?
+</a>
 
 </div>
 
-<button type="submit" name="login" class="login-btn">
+
+<button
+type="submit"
+name="login"
+class="login-btn">
+
 Login
+
 </button>
 
 </form>
+
 
 <div class="signup">
 
@@ -132,9 +162,12 @@ Create Account
 
 </div>
 
+
 <div class="right">
 
-<img src="images/car.jpg" alt="Luxury Cars">
+<img
+src="images/car.jpg"
+alt="Luxury Cars">
 
 </div>
 

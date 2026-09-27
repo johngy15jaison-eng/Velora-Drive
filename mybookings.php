@@ -74,8 +74,10 @@ function e($value)
 <link
     rel="stylesheet"
     href="css/mybookings.css"
+<link rel="stylesheet" href="css/responsive.css?v=3001">
 >
 
+<link rel="stylesheet" href="css/mobile.css">
 
 <!-- FONT AWESOME -->
 

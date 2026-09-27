@@ -18,7 +18,9 @@ if(!isset($_SESSION['fullname'])){
 
 <title>Velora Drive | Contact Us</title>
 
+<link rel="stylesheet" href="css/mobile.css">
 <link rel="stylesheet" href="css/contact.css">
+<link rel="stylesheet" href="css/responsive.css?v=3001">
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
