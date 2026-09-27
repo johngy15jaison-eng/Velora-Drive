@@ -7,34 +7,49 @@ use PHPMailer\PHPMailer\Exception;
 
 
 // ==========================================
-// Load Composer
+// Load Composer / PHPMailer
 // ==========================================
 
 require_once __DIR__ . '/vendor/autoload.php';
 
 
 // ==========================================
-// Load Local Mail Configuration
+// Mail Configuration
 // ==========================================
-// This file is ignored by Git.
-// It contains your local Gmail credentials.
-
-require_once __DIR__ . '/includes/mail_config.php';
-
-
+//
+// Railway:
+//   Uses MAIL_USERNAME and MAIL_PASSWORD
+//
+// Local XAMPP:
+//   Uses includes/mail_config.php
+//
+// mail_config.php is ignored by Git and
+// must NOT be uploaded to GitHub.
 // ==========================================
-// Railway Mail Configuration
-// ==========================================
-// If Railway variables exist, use them.
-// Otherwise, keep the local XAMPP credentials.
 
 if (
     getenv("MAIL_USERNAME") &&
     getenv("MAIL_PASSWORD")
 ) {
 
+    // Railway / Production
+
     $mail_username = getenv("MAIL_USERNAME");
     $mail_password = getenv("MAIL_PASSWORD");
+
+} else {
+
+    // Local XAMPP
+
+    $mail_config = __DIR__ . '/includes/mail_config.php';
+
+    if (!file_exists($mail_config)) {
+
+        die("Mail configuration file is missing.");
+
+    }
+
+    require_once $mail_config;
 
 }
 
@@ -45,6 +60,10 @@ if (
 
 require_once __DIR__ . '/includes/db.php';
 
+
+// ==========================================
+// Messages
+// ==========================================
 
 $message = "";
 $message_type = "";
@@ -106,7 +125,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 
             // ==========================================
-            // User Found
+            // Check User
             // ==========================================
 
             if ($result->num_rows > 0) {
@@ -124,7 +143,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 
                 // ==========================================
-                // Check Mail Configuration
+                // Check Mail Credentials
                 // ==========================================
 
                 if (
@@ -151,7 +170,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     try {
 
                         // ==========================================
-                        // Gmail SMTP
+                        // SMTP Settings
                         // ==========================================
 
                         $mail->isSMTP();
@@ -168,6 +187,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             PHPMailer::ENCRYPTION_STARTTLS;
 
                         $mail->Port = 587;
+
+                        // Disable SMTP debug messages
+                        $mail->SMTPDebug = 0;
 
 
                         // ==========================================
@@ -191,13 +213,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 
                         // ==========================================
-                        // Email Format
+                        // Email Settings
                         // ==========================================
 
                         $mail->isHTML(true);
 
+                        $mail->CharSet = "UTF-8";
+
                         $mail->Subject =
                             "Velora Drive - Password Reset Code";
+
+
+                        // Safely display user's name
+                        $safe_fullname =
+                            htmlspecialchars(
+                                $fullname,
+                                ENT_QUOTES,
+                                "UTF-8"
+                            );
 
 
                         // ==========================================
@@ -230,8 +263,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         <body style='
                             margin:0;
                             padding:0;
-                            background:#f6f6f6;
-                            font-family:Arial,sans-serif;
+                            background:#f5f5f5;
+                            font-family:Arial,
+                            Helvetica,sans-serif;
                         '>
 
 
@@ -240,7 +274,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 margin:40px auto;
                                 background:#ffffff;
                                 padding:35px;
-                                border-radius:12px;
+                                border-radius:14px;
                                 box-shadow:
                                 0 5px 20px
                                 rgba(0,0,0,0.08);
@@ -248,9 +282,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 
                                 <h1 style='
-                                    margin:0 0 5px;
+                                    margin:0;
                                     color:#222222;
-                                    font-size:28px;
+                                    font-size:30px;
+                                    font-weight:700;
                                 '>
 
                                     Velora
@@ -267,8 +302,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 
                                 <p style='
-                                    color:#777777;
                                     margin-top:5px;
+                                    color:#888888;
+                                    font-size:13px;
                                 '>
 
                                     Vehicle Rental Management
@@ -286,6 +322,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                                 <h2 style='
                                     color:#222222;
+                                    font-size:22px;
                                 '>
 
                                     Password Reset
@@ -299,10 +336,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                     line-height:1.6;
                                 '>
 
-                                    Hello
-                                    "
-                                    . htmlspecialchars($fullname)
-                                    . ",
+                                    Hello {$safe_fullname},
 
                                 </p>
 
@@ -322,6 +356,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 <p style='
                                     color:#555555;
                                     font-size:15px;
+                                    line-height:1.6;
                                 '>
 
                                     Your verification code is:
@@ -332,13 +367,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 <div style='
                                     background:#faf8f0;
                                     border:
-                                    1px solid #e8dcae;
+                                    1px solid #e5d8a7;
                                     border-radius:10px;
                                     padding:20px;
                                     text-align:center;
                                     margin:25px 0;
                                 '>
-
 
                                     <span style='
                                         font-size:32px;
@@ -347,12 +381,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                         color:#c8a43b;
                                     '>
 
-                                        "
-                                        . $code
-                                        . "
+                                        {$code}
 
                                     </span>
-
 
                                 </div>
 
@@ -364,9 +395,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 '>
 
                                     This verification code is valid for
-                                    <strong>
-                                        10 minutes
-                                    </strong>.
+                                    <strong>10 minutes</strong>.
 
                                 </p>
 
@@ -378,7 +407,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 '>
 
                                     If you did not request a password
-                                    reset, please ignore this email.
+                                    reset, you can safely ignore
+                                    this email.
 
                                 </p>
 
@@ -399,13 +429,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                                     This is an automated email from
                                     Velora Drive.
-                                    Please do not reply to this message.
+                                    Please do not reply to this email.
 
                                 </p>
 
 
                             </div>
-
 
                         </body>
 
@@ -415,7 +444,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 
                         // ==========================================
-                        // Plain Text Email
+                        // Plain Text Version
                         // ==========================================
 
                         $mail->AltBody =
@@ -423,13 +452,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             $fullname .
                             ",\n\n" .
 
-                            "Your Velora Drive password reset " .
-                            "code is: " .
+                            "Your Velora Drive password " .
+                            "reset verification code is: " .
                             $code .
                             "\n\n" .
 
-                            "This code will expire in " .
-                            "10 minutes.\n\n" .
+                            "This code is valid for 10 minutes." .
+                            "\n\n" .
 
                             "If you did not request a password " .
                             "reset, please ignore this email.";
@@ -443,7 +472,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 
                         // ==========================================
-                        // Store Reset Information
+                        // Store Reset Information in Session
                         // ==========================================
 
                         $_SESSION["reset_email"] = $email;
@@ -456,7 +485,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 
                         // ==========================================
-                        // Redirect
+                        // Close Statement
+                        // ==========================================
+
+                        $stmt->close();
+
+
+                        // ==========================================
+                        // Go to Reset Password Page
                         // ==========================================
 
                         header(
@@ -468,9 +504,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                     } catch (Exception $e) {
 
-                        // ==========================================
-                        // Do NOT show SMTP details to users
-                        // ==========================================
+                        // Do not expose SMTP credentials
+                        // or PHPMailer errors to users.
 
                         $message =
                             "Unable to send the verification email. " .
@@ -494,7 +529,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
 
 
-            $stmt->close();
+            // Close statement if it wasn't already closed
+            if ($stmt) {
+
+                $stmt->close();
+
+            }
 
         }
 
@@ -532,7 +572,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     <link
         rel="preconnect"
-        href="https://fonts.googleapis.com"
+        href="https://fonts.gstatic.com"
         crossorigin
     >
 
@@ -553,13 +593,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <style>
 
         * {
-
             margin: 0;
-
             padding: 0;
-
             box-sizing: border-box;
-
         }
 
 
@@ -908,21 +944,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <div class="logo">
 
             <h1>
-
                 Velora <span>Drive</span>
-
             </h1>
 
             <p>
-
                 Vehicle Rental Management
-
             </p>
 
         </div>
 
 
-        <!-- Icon -->
+        <!-- Lock Icon -->
 
         <div class="icon">
 
@@ -949,28 +981,35 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         </p>
 
 
-        <!-- Message -->
+        <!-- Error Message -->
 
         <?php if (!empty($message)): ?>
 
             <div class="message <?= htmlspecialchars(
-                $message_type
+                $message_type,
+                ENT_QUOTES,
+                "UTF-8"
             ) ?>">
 
-                <?= htmlspecialchars($message) ?>
+                <?= htmlspecialchars(
+                    $message,
+                    ENT_QUOTES,
+                    "UTF-8"
+                ) ?>
 
             </div>
 
         <?php endif; ?>
 
 
-        <!-- Form -->
+        <!-- Forgot Password Form -->
 
-        <form method="POST">
-
+        <form
+            method="POST"
+            action=""
+        >
 
             <div class="form-group">
-
 
                 <label for="email">
 
@@ -980,7 +1019,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 
                 <div class="input-box">
-
 
                     <i class="fa-solid fa-envelope"></i>
 
@@ -993,13 +1031,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         required
                         autocomplete="email"
                         value="<?= htmlspecialchars(
-                            $_POST["email"] ?? ""
+                            $_POST["email"] ?? "",
+                            ENT_QUOTES,
+                            "UTF-8"
                         ) ?>"
                     >
 
-
                 </div>
-
 
             </div>
 
@@ -1015,14 +1053,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             </button>
 
-
         </form>
 
 
         <!-- Back to Login -->
 
         <div class="back-login">
-
 
             <a href="index.php">
 
@@ -1031,7 +1067,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 Back to Login
 
             </a>
-
 
         </div>
 
