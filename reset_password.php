@@ -1,4 +1,5 @@
 <?php
+
 session_start();
 
 require_once __DIR__ . '/includes/db.php';
@@ -6,113 +7,177 @@ require_once __DIR__ . '/includes/db.php';
 $message = "";
 $message_type = "";
 
-// Get reset information from session
 $reset_email = $_SESSION["reset_email"] ?? "";
 $reset_code = $_SESSION["reset_code"] ?? "";
 $reset_expiry = $_SESSION["reset_expiry"] ?? 0;
 
-// Code shown only for local testing
-$display_code = $_SESSION["reset_display_code"] ?? "";
 
-// Check whether a valid reset session exists
+// ==========================================
+// Check whether reset request exists
+// ==========================================
+
 if (
     empty($reset_email) ||
     empty($reset_code) ||
     empty($reset_expiry)
 ) {
-    $message = "No password reset request found. Please start again.";
+
+    $message = "No password reset request found. Please request a new verification code.";
     $message_type = "error";
+
 }
 
-// Handle password reset form
+
+// ==========================================
+// Process reset form
+// ==========================================
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $code = trim($_POST["code"] ?? "");
+
     $new_password = $_POST["new_password"] ?? "";
+
     $confirm_password = $_POST["confirm_password"] ?? "";
 
+
+    // ==========================================
     // Check reset session
+    // ==========================================
+
     if (
         empty($reset_email) ||
         empty($reset_code) ||
         empty($reset_expiry)
     ) {
 
-        $message = "No password reset request found. Please start again.";
+        $message =
+            "No password reset request found. Please request a new code.";
+
         $message_type = "error";
 
-    // Check code expiry
+
+    // ==========================================
+    // Check expiry
+    // ==========================================
+
     } elseif (time() > $reset_expiry) {
 
-        $message = "Your reset code has expired. Please request a new code.";
+        $message =
+            "Your verification code has expired. Please request a new code.";
+
         $message_type = "error";
 
         unset(
             $_SESSION["reset_email"],
             $_SESSION["reset_code"],
-            $_SESSION["reset_expiry"],
-            $_SESSION["reset_display_code"]
+            $_SESSION["reset_expiry"]
         );
 
-    // Check reset code
+
+    // ==========================================
+    // Validate verification code
+    // ==========================================
+
     } elseif (!preg_match('/^[0-9]{6}$/', $code)) {
 
-        $message = "Please enter the 6-digit reset code.";
+        $message =
+            "Please enter the 6-digit verification code.";
+
         $message_type = "error";
+
 
     } elseif ($code !== (string)$reset_code) {
 
-        $message = "Invalid reset code.";
+        $message =
+            "Invalid verification code. Please check your email and try again.";
+
         $message_type = "error";
 
-    // Check passwords
-    } elseif (empty($new_password) || empty($confirm_password)) {
 
-        $message = "Please enter and confirm your new password.";
+    // ==========================================
+    // Validate passwords
+    // ==========================================
+
+    } elseif (
+        empty($new_password) ||
+        empty($confirm_password)
+    ) {
+
+        $message =
+            "Please enter and confirm your new password.";
+
         $message_type = "error";
+
 
     } elseif ($new_password !== $confirm_password) {
 
-        $message = "Passwords do not match.";
+        $message =
+            "Passwords do not match.";
+
         $message_type = "error";
+
 
     } elseif (strlen($new_password) < 8) {
 
-        $message = "Password must contain at least 8 characters.";
+        $message =
+            "Password must contain at least 8 characters.";
+
         $message_type = "error";
+
 
     } elseif (!preg_match('/[A-Z]/', $new_password)) {
 
-        $message = "Password must contain at least one uppercase letter.";
+        $message =
+            "Password must contain at least one uppercase letter.";
+
         $message_type = "error";
+
 
     } elseif (!preg_match('/[a-z]/', $new_password)) {
 
-        $message = "Password must contain at least one lowercase letter.";
+        $message =
+            "Password must contain at least one lowercase letter.";
+
         $message_type = "error";
+
 
     } elseif (!preg_match('/[0-9]/', $new_password)) {
 
-        $message = "Password must contain at least one number.";
+        $message =
+            "Password must contain at least one number.";
+
         $message_type = "error";
+
 
     } elseif (!preg_match('/[^A-Za-z0-9]/', $new_password)) {
 
-        $message = "Password must contain at least one special character.";
+        $message =
+            "Password must contain at least one special character.";
+
         $message_type = "error";
+
 
     } else {
 
+        // ==========================================
         // Hash new password
+        // ==========================================
+
         $hashed_password = password_hash(
             $new_password,
             PASSWORD_DEFAULT
         );
 
-        // Update password in users table
+
+        // ==========================================
+        // Update password
+        // ==========================================
+
         $stmt = $conn->prepare(
             "UPDATE users SET password = ? WHERE email = ?"
         );
+
 
         if ($stmt) {
 
@@ -122,53 +187,101 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $reset_email
             );
 
+
             if ($stmt->execute()) {
 
-                // Clear reset information
+                // ==================================
+                // Clear reset session
+                // ==================================
+
                 unset(
                     $_SESSION["reset_email"],
                     $_SESSION["reset_code"],
-                    $_SESSION["reset_expiry"],
-                    $_SESSION["reset_display_code"]
+                    $_SESSION["reset_expiry"]
                 );
 
-                // Redirect to login page
-                header("Location: index.php?reset=success");
+
+                // ==================================
+                // Redirect to login
+                // ==================================
+
+                header(
+                    "Location: index.php?reset=success"
+                );
+
                 exit;
+
 
             } else {
 
-                $message = "Unable to update your password. Please try again.";
+                $message =
+                    "Unable to update your password. Please try again.";
+
                 $message_type = "error";
+
             }
+
 
             $stmt->close();
 
+
         } else {
 
-            $message = "Database error. Please try again.";
+            $message =
+                "Database error. Please try again.";
+
             $message_type = "error";
+
         }
+
     }
+
 }
+
 ?>
 
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Velora Drive | Reset Password</title>
 
+
+    <!-- Google Font -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- Font Awesome -->
+
     <link
         rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
     >
+
 
     <style>
 
@@ -178,369 +291,622 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             box-sizing: border-box;
         }
 
+
         body {
+
             font-family: "Poppins", sans-serif;
-            background: #f7f7f7;
 
             min-height: 100vh;
 
             display: flex;
-            align-items: center;
+
             justify-content: center;
+
+            align-items: center;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #f8f8f8,
+                    #f1eee5
+                );
+
+            padding: 20px;
+
         }
 
-        .reset-container {
+
+        .container {
+
             width: 100%;
-            max-width: 540px;
 
-            padding: 25px;
+            max-width: 470px;
+
         }
 
-        .reset-card {
+
+        .card {
+
             background: #ffffff;
+
+            padding: 40px;
 
             border-radius: 18px;
 
-            padding: 50px 45px;
-
             box-shadow:
-                0 10px 35px rgba(0, 0, 0, 0.08);
+                0 15px 45px
+                rgba(0, 0, 0, 0.10);
+
         }
 
-        .reset-card h1 {
+
+        .logo {
+
             text-align: center;
 
-            font-size: 32px;
+            margin-bottom: 25px;
+
+        }
+
+
+        .logo h1 {
+
+            font-size: 30px;
+
+            color: #222222;
 
             font-weight: 700;
 
-            color: #111111;
-
-            margin-bottom: 10px;
         }
 
-        .subtitle {
+
+        .logo span {
+
+            color: #c8a43b;
+
+        }
+
+
+        .logo p {
+
+            color: #999999;
+
+            font-size: 13px;
+
+            margin-top: 3px;
+
+        }
+
+
+        .icon {
+
+            width: 65px;
+
+            height: 65px;
+
+            margin: 0 auto 20px;
+
+            border-radius: 50%;
+
+            background: #faf8f0;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            color: #c8a43b;
+
+            font-size: 25px;
+
+        }
+
+
+        .title {
+
+            text-align: center;
+
+            margin-bottom: 8px;
+
+            color: #222222;
+
+            font-size: 23px;
+
+            font-weight: 600;
+
+        }
+
+
+        .description {
+
             text-align: center;
 
             color: #777777;
 
-            font-size: 15px;
+            font-size: 13px;
 
-            margin-bottom: 28px;
-        }
+            line-height: 1.6;
 
-        /* Reset code display */
-
-        .reset-code-display {
             margin-bottom: 25px;
 
-            padding: 13px 15px;
+        }
+
+
+        .email-info {
+
+            background: #faf8f0;
+
+            border: 1px solid #e8dcae;
+
+            border-radius: 9px;
+
+            padding: 12px;
 
             text-align: center;
 
-            background: #fff8e5;
+            margin-bottom: 20px;
 
-            border: 1px solid #e6cf8a;
+            font-size: 12px;
 
-            border-radius: 8px;
+            color: #666666;
 
-            color: #555555;
-
-            font-size: 14px;
-
-            line-height: 1.5;
         }
 
-        .reset-code-display strong {
-            display: block;
 
-            margin-top: 3px;
+        .email-info strong {
 
-            color: #c8a43b;
+            color: #333333;
 
-            font-size: 20px;
-
-            letter-spacing: 3px;
         }
+
 
         .form-group {
-            margin-bottom: 22px;
+
+            margin-bottom: 18px;
+
         }
 
-        .form-group label {
+
+        label {
+
             display: block;
 
-            font-size: 15px;
+            font-size: 13px;
 
             font-weight: 500;
 
-            color: #111111;
+            color: #444444;
 
-            margin-bottom: 8px;
+            margin-bottom: 7px;
+
         }
 
-        .form-group input {
+
+        .input-box {
+
+            position: relative;
+
+        }
+
+
+        .input-box i {
+
+            position: absolute;
+
+            left: 15px;
+
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            color: #aaa;
+
+            font-size: 14px;
+
+        }
+
+
+        input {
+
             width: 100%;
 
-            height: 52px;
+            padding: 13px 15px 13px 42px;
 
             border: 1px solid #dddddd;
 
             border-radius: 9px;
 
-            padding: 0 15px;
+            outline: none;
 
             font-family: "Poppins", sans-serif;
 
-            font-size: 14px;
-
-            outline: none;
+            font-size: 13px;
 
             transition: 0.3s;
+
         }
 
-        .form-group input:focus {
+
+        input:focus {
+
             border-color: #c8a43b;
 
             box-shadow:
-                0 0 0 3px rgba(200, 164, 59, 0.12);
+                0 0 0 3px
+                rgba(200, 164, 59, 0.10);
+
         }
 
-        .password-note {
-            font-size: 12px;
 
-            color: #777777;
+        .code-input {
 
-            margin-top: 7px;
+            letter-spacing: 5px;
 
-            line-height: 1.5;
+            font-weight: 600;
+
+            text-align: center;
+
+            font-size: 17px;
+
         }
 
-        .reset-btn {
+
+        .button {
+
             width: 100%;
 
-            height: 52px;
-
             border: none;
-
-            border-radius: 9px;
 
             background: #c8a43b;
 
             color: #ffffff;
 
+            padding: 13px;
+
+            border-radius: 9px;
+
             font-family: "Poppins", sans-serif;
 
-            font-size: 15px;
+            font-size: 14px;
 
-            font-weight: 500;
+            font-weight: 600;
 
             cursor: pointer;
 
             transition: 0.3s;
+
         }
 
-        .reset-btn:hover {
-            background: #b28f2e;
+
+        .button:hover {
+
+            background: #ad8c2f;
+
+            transform: translateY(-1px);
+
         }
+
 
         .message {
-            margin-top: 22px;
 
-            padding: 13px 15px;
+            padding: 11px 13px;
 
             border-radius: 8px;
 
-            font-size: 14px;
+            font-size: 12px;
 
-            text-align: center;
+            margin-bottom: 18px;
 
             line-height: 1.5;
+
         }
+
 
         .message.error {
-            background: #fff1f1;
 
-            color: #b52b2b;
+            background: #fff0f0;
 
-            border: 1px solid #f0c3c3;
+            color: #c0392b;
+
+            border: 1px solid #f3c5c0;
+
         }
 
+
         .back-login {
-            display: block;
 
             text-align: center;
 
-            margin-top: 30px;
+            margin-top: 20px;
 
-            color: #555555;
+        }
+
+
+        .back-login a {
+
+            color: #c8a43b;
 
             text-decoration: none;
 
-            font-size: 14px;
+            font-size: 13px;
+
+            font-weight: 500;
+
         }
 
-        .back-login:hover {
-            color: #c8a43b;
+
+        .back-login a:hover {
+
+            text-decoration: underline;
+
         }
 
-        @media (max-width: 600px) {
 
-            .reset-container {
-                padding: 15px;
+        .security-note {
+
+            text-align: center;
+
+            margin-top: 18px;
+
+            color: #999999;
+
+            font-size: 11px;
+
+        }
+
+
+        @media (max-width: 500px) {
+
+            .card {
+
+                padding: 28px 22px;
+
             }
 
-            .reset-card {
-                padding: 40px 25px;
+
+            .logo h1 {
+
+                font-size: 26px;
+
             }
 
-            .reset-card h1 {
-                font-size: 27px;
-            }
         }
 
     </style>
 
 </head>
 
+
 <body>
 
-    <div class="reset-container">
+<div class="container">
 
-        <div class="reset-card">
+    <div class="card">
 
-            <h1>Reset Password</h1>
 
-            <p class="subtitle">
-                Enter the reset code and create a new password.
+        <!-- Logo -->
+
+        <div class="logo">
+
+            <h1>
+                Velora <span>Drive</span>
+            </h1>
+
+            <p>
+                Vehicle Rental Management
             </p>
 
-
-            <?php if (!empty($display_code)): ?>
-
-                <div class="reset-code-display">
-
-                    Your reset code is:
-
-                    <strong>
-                        <?= htmlspecialchars(
-                            $display_code,
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>
-                    </strong>
-
-                </div>
-
-            <?php endif; ?>
+        </div>
 
 
-            <form
-                method="POST"
-                action="reset_password.php"
-            >
+        <!-- Icon -->
+
+        <div class="icon">
+
+            <i class="fa-solid fa-shield-halved"></i>
+
+        </div>
+
+
+        <!-- Title -->
+
+        <h2 class="title">
+
+            Reset Password
+
+        </h2>
+
+
+        <p class="description">
+
+            Enter the verification code sent to
+            your email and create a new password.
+
+        </p>
+
+
+        <?php if (!empty($reset_email)): ?>
+
+            <div class="email-info">
+
+                Verification code sent to:
+
+                <br>
+
+                <strong>
+                    <?= htmlspecialchars($reset_email) ?>
+                </strong>
+
+            </div>
+
+        <?php endif; ?>
+
+
+        <?php if (!empty($message)): ?>
+
+            <div class="message <?= $message_type ?>">
+
+                <?= htmlspecialchars($message) ?>
+
+            </div>
+
+        <?php endif; ?>
+
+
+        <?php if (
+            !empty($reset_email) &&
+            !empty($reset_code) &&
+            !empty($reset_expiry)
+        ): ?>
+
+
+            <form method="POST">
+
+
+                <!-- Verification Code -->
 
                 <div class="form-group">
 
                     <label for="code">
-                        Reset Code
+
+                        Verification Code
+
                     </label>
 
-                    <input
-                        type="text"
-                        id="code"
-                        name="code"
-                        placeholder="Enter 6-digit code"
-                        maxlength="6"
-                        pattern="[0-9]{6}"
-                        inputmode="numeric"
-                        autocomplete="one-time-code"
-                        required
-                    >
+
+                    <div class="input-box">
+
+                        <i class="fa-solid fa-key"></i>
+
+
+                        <input
+                            type="text"
+                            id="code"
+                            name="code"
+                            class="code-input"
+                            placeholder="6-digit code"
+                            maxlength="6"
+                            inputmode="numeric"
+                            autocomplete="one-time-code"
+                            required
+                        >
+
+                    </div>
 
                 </div>
 
+
+                <!-- New Password -->
 
                 <div class="form-group">
 
                     <label for="new_password">
+
                         New Password
+
                     </label>
 
-                    <input
-                        type="password"
-                        id="new_password"
-                        name="new_password"
-                        placeholder="Enter new password"
-                        autocomplete="new-password"
-                        required
-                    >
 
-                    <p class="password-note">
-                        Minimum 8 characters, including uppercase,
-                        lowercase, number and special character.
-                    </p>
+                    <div class="input-box">
+
+                        <i class="fa-solid fa-lock"></i>
+
+
+                        <input
+                            type="password"
+                            id="new_password"
+                            name="new_password"
+                            placeholder="Enter new password"
+                            minlength="8"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                    </div>
 
                 </div>
 
+
+                <!-- Confirm Password -->
 
                 <div class="form-group">
 
                     <label for="confirm_password">
+
                         Confirm New Password
+
                     </label>
 
-                    <input
-                        type="password"
-                        id="confirm_password"
-                        name="confirm_password"
-                        placeholder="Confirm your password"
-                        autocomplete="new-password"
-                        required
-                    >
+
+                    <div class="input-box">
+
+                        <i class="fa-solid fa-lock"></i>
+
+
+                        <input
+                            type="password"
+                            id="confirm_password"
+                            name="confirm_password"
+                            placeholder="Confirm new password"
+                            minlength="8"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                    </div>
 
                 </div>
 
 
+                <!-- Submit -->
+
                 <button
                     type="submit"
-                    class="reset-btn"
+                    class="button"
                 >
+
+                    <i class="fa-solid fa-check"></i>
+
                     Reset Password
+
                 </button>
+
 
             </form>
 
 
-            <?php if (!empty($message)): ?>
+            <div class="security-note">
 
-                <div class="message <?= htmlspecialchars(
-                    $message_type,
-                    ENT_QUOTES,
-                    'UTF-8'
-                ) ?>">
+                <i class="fa-solid fa-clock"></i>
 
-                    <?= htmlspecialchars(
-                        $message,
-                        ENT_QUOTES,
-                        'UTF-8'
-                    ) ?>
+                Your verification code is valid for
+                10 minutes.
 
-                </div>
-
-            <?php endif; ?>
+            </div>
 
 
-            <a
-                href="index.php"
-                class="back-login"
-            >
-                ← Back to Login
+        <?php endif; ?>
+
+
+        <!-- Back to Login -->
+
+        <div class="back-login">
+
+            <a href="index.php">
+
+                <i class="fa-solid fa-arrow-left"></i>
+
+                Back to Login
+
             </a>
 
         </div>
 
+
     </div>
+
+</div>
 
 </body>
 
