@@ -443,8 +443,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                     $payload = [
 
-                        "from" =>
-                            "Velora Drive <onboarding@resend.dev>",
+                       "from" => "Velora Drive <onboarding@resend.dev>",
 
                         "to" => [$email],
 
