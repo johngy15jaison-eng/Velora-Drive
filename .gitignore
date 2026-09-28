@@ -3,5 +3,6 @@ test.php
 test_db.php
 details_test.php
 includes/mail_config.php
+includes/gmail_config.php
 vendor/
 vendor/

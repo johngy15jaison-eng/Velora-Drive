@@ -4,39 +4,49 @@ session_start();
 
 require_once __DIR__ . "/includes/db.php";
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
 
 /*
 |--------------------------------------------------------------------------
-| RESEND API CONFIGURATION
+| GMAIL SMTP CONFIGURATION
 |--------------------------------------------------------------------------
 |
 | Railway:
-|   Uses RESEND_API_KEY environment variable.
+|   Set GMAIL_USERNAME and GMAIL_APP_PASSWORD as Railway variables.
 |
 | Local XAMPP:
-|   Uses includes/resend_config.php
+|   Create includes/gmail_config.php and put your Gmail sender and
+|   16-character Google App Password there.
+|
+| IMPORTANT:
+|   Never put your normal Gmail password in this file.
+|   Gmail SMTP should use an App Password when 2-Step Verification
+|   is enabled on the Google account.
 |
 |--------------------------------------------------------------------------
 */
 
-if (getenv("RESEND_API_KEY")) {
+$gmail_username = getenv("GMAIL_USERNAME") ?: "";
+$gmail_app_password = getenv("GMAIL_APP_PASSWORD") ?: "";
 
-    // Railway / Production
-    $resend_api_key = getenv("RESEND_API_KEY");
 
-} else {
+if (empty($gmail_username) || empty($gmail_app_password)) {
 
-    // Local XAMPP
-    $local_config = __DIR__ . "/includes/resend_config.php";
+    $local_config = __DIR__ . "/includes/gmail_config.php";
 
     if (file_exists($local_config)) {
 
         require_once $local_config;
 
-    } else {
+        if (isset($gmail_username_config)) {
+            $gmail_username = $gmail_username_config;
+        }
 
-        $resend_api_key = "";
-
+        if (isset($gmail_app_password_config)) {
+            $gmail_app_password = $gmail_app_password_config;
+        }
     }
 }
 
@@ -59,150 +69,74 @@ $message_type = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
+    if (empty($gmail_username) || empty($gmail_app_password)) {
 
-    /*
-    |--------------------------------------------------------------------------
-    | CHECK RESEND CONFIGURATION
-    |--------------------------------------------------------------------------
-    */
-
-    if (empty($resend_api_key)) {
-
-        $message =
-            "Email service configuration is missing.";
-
+        $message = "Gmail SMTP configuration is missing.";
         $message_type = "error";
 
     } else {
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | GET EMAIL
-        |--------------------------------------------------------------------------
-        */
-
         $email = trim($_POST["email"] ?? "");
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDATE EMAIL
-        |--------------------------------------------------------------------------
-        */
 
         if (empty($email)) {
 
-            $message =
-                "Please enter your email address.";
-
+            $message = "Please enter your email address.";
             $message_type = "error";
 
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
-            $message =
-                "Please enter a valid email address.";
-
+            $message = "Please enter a valid email address.";
             $message_type = "error";
 
         } else {
 
-
             /*
-            |--------------------------------------------------------------------------
+            |------------------------------------------------------------------
             | CHECK REGISTERED USER
-            |--------------------------------------------------------------------------
+            |------------------------------------------------------------------
             */
 
             $stmt = $conn->prepare(
-                "SELECT id, fullname
-                 FROM users
-                 WHERE email = ?
-                 LIMIT 1"
+                "SELECT id, fullname FROM users WHERE email = ? LIMIT 1"
             );
-
 
             if (!$stmt) {
 
-                $message =
-                    "Something went wrong. Please try again later.";
-
+                $message = "Something went wrong. Please try again later.";
                 $message_type = "error";
 
             } else {
 
                 $stmt->bind_param("s", $email);
-
                 $stmt->execute();
 
                 $result = $stmt->get_result();
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | USER NOT FOUND
-                |--------------------------------------------------------------------------
-                */
-
                 if ($result->num_rows === 0) {
 
-                    $message =
-                        "No account was found with this email address.";
-
+                    $message = "No account was found with this email address.";
                     $message_type = "error";
 
                 } else {
 
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | USER FOUND
-                    |--------------------------------------------------------------------------
-                    */
-
                     $user = $result->fetch_assoc();
-
                     $fullname = $user["fullname"];
 
+                    /* Generate a 6-digit verification code */
+                    $verification_code = random_int(100000, 999999);
+
+                    $subject = "Velora Drive - Password Reset Verification Code";
+
+                    $safe_fullname = htmlspecialchars(
+                        $fullname,
+                        ENT_QUOTES,
+                        "UTF-8"
+                    );
 
                     /*
-                    |--------------------------------------------------------------------------
-                    | GENERATE VERIFICATION CODE
-                    |--------------------------------------------------------------------------
-                    */
-
-                    $verification_code =
-                        random_int(100000, 999999);
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | EMAIL SUBJECT
-                    |--------------------------------------------------------------------------
-                    */
-
-                    $subject =
-                        "Velora Drive - Password Reset Verification Code";
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | SAFELY ESCAPE USER NAME
-                    |--------------------------------------------------------------------------
-                    */
-
-                    $safe_fullname =
-                        htmlspecialchars(
-                            $fullname,
-                            ENT_QUOTES,
-                            "UTF-8"
-                        );
-
-
-                    /*
-                    |--------------------------------------------------------------------------
+                    |----------------------------------------------------------
                     | EMAIL HTML
-                    |--------------------------------------------------------------------------
+                    |----------------------------------------------------------
                     */
 
                     $html = "
@@ -212,219 +146,68 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <html>
 
                     <head>
-
                         <meta charset='UTF-8'>
-
                     </head>
 
+                    <body style='margin:0; padding:0; background:#f6f5f1; font-family:Arial,sans-serif;'>
 
-                    <body
-                        style='
-                            margin:0;
-                            padding:0;
-                            background:#f6f5f1;
-                            font-family:Arial,sans-serif;
-                        '
-                    >
+                        <div style='max-width:600px; margin:40px auto; background:#ffffff; border-radius:12px; overflow:hidden; border:1px solid #e5e0d5;'>
 
-                        <div
-                            style='
-                                max-width:600px;
-                                margin:40px auto;
-                                background:#ffffff;
-                                border-radius:12px;
-                                overflow:hidden;
-                                border:1px solid #e5e0d5;
-                            '
-                        >
+                            <div style='background:#222222; padding:25px; text-align:center;'>
 
-
-                            <!-- HEADER -->
-
-                            <div
-                                style='
-                                    background:#222222;
-                                    padding:25px;
-                                    text-align:center;
-                                '
-                            >
-
-                                <h1
-                                    style='
-                                        margin:0;
-                                        color:#ffffff;
-                                        font-size:28px;
-                                    '
-                                >
-
-                                    Velora
-
-                                    <span
-                                        style='
-                                            color:#c8a43b;
-                                        '
-                                    >
-                                        Drive
-                                    </span>
-
+                                <h1 style='margin:0; color:#ffffff; font-size:28px;'>
+                                    Velora <span style='color:#c8a43b;'>Drive</span>
                                 </h1>
 
-
-                                <p
-                                    style='
-                                        margin:6px 0 0;
-                                        color:#cccccc;
-                                        font-size:13px;
-                                    '
-                                >
+                                <p style='margin:6px 0 0; color:#cccccc; font-size:13px;'>
                                     Vehicle Rental Management
                                 </p>
 
                             </div>
 
+                            <div style='padding:35px 30px;'>
 
-                            <!-- CONTENT -->
-
-                            <div
-                                style='
-                                    padding:35px 30px;
-                                '
-                            >
-
-                                <h2
-                                    style='
-                                        margin-top:0;
-                                        color:#222222;
-                                    '
-                                >
+                                <h2 style='margin-top:0; color:#222222;'>
                                     Password Reset
                                 </h2>
 
-
-                                <p
-                                    style='
-                                        color:#555555;
-                                        line-height:1.6;
-                                    '
-                                >
-
+                                <p style='color:#555555; line-height:1.6;'>
                                     Hello {$safe_fullname},
-
                                 </p>
 
-
-                                <p
-                                    style='
-                                        color:#555555;
-                                        line-height:1.6;
-                                    '
-                                >
-
-                                    We received a request to reset
-                                    the password for your
-                                    Velora Drive account.
-
+                                <p style='color:#555555; line-height:1.6;'>
+                                    We received a request to reset the password for your Velora Drive account.
                                 </p>
 
-
-                                <p
-                                    style='
-                                        color:#555555;
-                                        line-height:1.6;
-                                    '
-                                >
-
+                                <p style='color:#555555; line-height:1.6;'>
                                     Your verification code is:
-
                                 </p>
 
+                                <div style='text-align:center; margin:30px 0;'>
 
-                                <!-- CODE -->
-
-                                <div
-                                    style='
-                                        text-align:center;
-                                        margin:30px 0;
-                                    '
-                                >
-
-                                    <span
-                                        style='
-                                            display:inline-block;
-                                            padding:15px 28px;
-                                            background:#faf5e5;
-                                            border:1px solid #e5d49b;
-                                            border-radius:10px;
-                                            color:#b28f2e;
-                                            font-size:30px;
-                                            font-weight:bold;
-                                            letter-spacing:7px;
-                                        '
-                                    >
-
+                                    <span style='display:inline-block; padding:15px 28px; background:#faf5e5; border:1px solid #e5d49b; border-radius:10px; color:#b28f2e; font-size:30px; font-weight:bold; letter-spacing:7px;'>
                                         {$verification_code}
-
                                     </span>
 
                                 </div>
 
-
-                                <p
-                                    style='
-                                        color:#777777;
-                                        font-size:13px;
-                                        line-height:1.6;
-                                    '
-                                >
-
-                                    This verification code will expire
-                                    in <strong>10 minutes</strong>.
-
+                                <p style='color:#777777; font-size:13px; line-height:1.6;'>
+                                    This verification code will expire in <strong>10 minutes</strong>.
                                 </p>
 
-
-                                <p
-                                    style='
-                                        color:#777777;
-                                        font-size:13px;
-                                        line-height:1.6;
-                                    '
-                                >
-
-                                    If you did not request a password
-                                    reset, you can safely ignore
-                                    this email.
-
+                                <p style='color:#777777; font-size:13px; line-height:1.6;'>
+                                    If you did not request a password reset, you can safely ignore this email.
                                 </p>
 
                             </div>
 
+                            <div style='background:#f7f6f2; padding:18px; text-align:center;'>
 
-                            <!-- FOOTER -->
-
-                            <div
-                                style='
-                                    background:#f7f6f2;
-                                    padding:18px;
-                                    text-align:center;
-                                '
-                            >
-
-                                <p
-                                    style='
-                                        margin:0;
-                                        color:#999999;
-                                        font-size:12px;
-                                    '
-                                >
-
-                                    © 2026 Velora Drive.
-                                    All rights reserved.
-
+                                <p style='margin:0; color:#999999; font-size:12px;'>
+                                    © 2026 Velora Drive. All rights reserved.
                                 </p>
 
                             </div>
-
 
                         </div>
 
@@ -436,254 +219,120 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 
                     /*
-                    |--------------------------------------------------------------------------
-                    | RESEND API REQUEST
-                    |--------------------------------------------------------------------------
+                    |------------------------------------------------------------------
+                    | SEND EMAIL USING GMAIL SMTP + PHPMailer
+                    |------------------------------------------------------------------
                     */
 
-                    $payload = [
+                    $autoload = __DIR__ . "/vendor/autoload.php";
 
-                       "from" => "Velora Drive <onboarding@resend.dev>",
-
-                        "to" => [$email],
-
-                        "subject" => $subject,
-
-                        "html" => $html
-
-                    ];
-
-
-                    $ch = curl_init(
-                        "https://api.resend.com/emails"
-                    );
-
-
-                    curl_setopt(
-                        $ch,
-                        CURLOPT_RETURNTRANSFER,
-                        true
-                    );
-
-
-                    curl_setopt(
-                        $ch,
-                        CURLOPT_POST,
-                        true
-                    );
-
-
-                    curl_setopt(
-                        $ch,
-                        CURLOPT_POSTFIELDS,
-                        json_encode($payload)
-                    );
-
-
-                    curl_setopt(
-                        $ch,
-                        CURLOPT_HTTPHEADER,
-                        [
-
-                            "Authorization: Bearer " .
-                            $resend_api_key,
-
-                            "Content-Type: application/json"
-
-                        ]
-                    );
-
-
-                    curl_setopt(
-                        $ch,
-                        CURLOPT_TIMEOUT,
-                        15
-                    );
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | SEND REQUEST
-                    |--------------------------------------------------------------------------
-                    */
-
-                    $response =
-                        curl_exec($ch);
-
-
-                    $curl_error =
-                        curl_error($ch);
-
-
-                    $http_code =
-                        curl_getinfo(
-                            $ch,
-                            CURLINFO_HTTP_CODE
-                        );
-
-
-                    curl_close($ch);
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | CHECK CURL ERROR
-                    |--------------------------------------------------------------------------
-                    */
-
-                    if (
-                        $response === false ||
-                        !empty($curl_error)
-                    ) {
+                    if (!file_exists($autoload)) {
 
                         $message =
-                            "Unable to connect to the email service.";
+                            "PHPMailer is not installed. Please run composer install.";
 
                         $message_type = "error";
 
-                    }
+                    } else {
 
+                        require_once $autoload;
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | CHECK RESEND ERROR
-                    |--------------------------------------------------------------------------
-                    */
+                        $mail = new PHPMailer(true);
 
-                    elseif (
-                        $http_code < 200 ||
-                        $http_code >= 300
-                    ) {
+                        try {
 
+                            /* SMTP settings */
+                            $mail->isSMTP();
+                            $mail->Host = "smtp.gmail.com";
+                            $mail->SMTPAuth = true;
+                            $mail->Username = $gmail_username;
+                            $mail->Password = $gmail_app_password;
 
-                        /*
-                        | Decode Resend response
-                        */
+                            /* Gmail SSL SMTP */
+                            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+                            $mail->Port = 465;
 
-                        $resend_data =
-                            json_decode(
-                                $response,
-                                true
+                            /* Sender */
+                            $mail->setFrom(
+                                $gmail_username,
+                                "Velora Drive"
                             );
 
+                            /* Recipient - the registered user's email */
+                            $mail->addAddress(
+                                $email,
+                                $fullname
+                            );
 
-                        /*
-                        | Get actual Resend error
-                        */
+                            /* Email content */
+                            $mail->isHTML(true);
+                            $mail->CharSet = "UTF-8";
+                            $mail->Subject = $subject;
+                            $mail->Body = $html;
+                            $mail->AltBody =
+                                "Your Velora Drive password reset verification code is: " .
+                                $verification_code .
+                                ". This code expires in 10 minutes.";
 
-                        $resend_error =
-                            $resend_data["message"]
-                            ?? "Unknown Resend error";
+                            /* Send */
+                            $mail->send();
 
 
-                        /*
-                        | Show actual error
-                        */
+                            /*
+                            |--------------------------------------------------
+                            | SAVE RESET INFORMATION IN SESSION
+                            |--------------------------------------------------
+                            */
 
-                        $message =
-                            "Resend Error: " .
-                            $resend_error;
+                            $_SESSION["reset_email"] = $email;
+                            $_SESSION["reset_code"] = (string)$verification_code;
+                            $_SESSION["reset_expiry"] = time() + (10 * 60);
+                            $_SESSION["code_verified"] = false;
 
-                        $message_type = "error";
 
+                            /*
+                            |--------------------------------------------------
+                            | GO TO RESET PASSWORD PAGE
+                            |--------------------------------------------------
+                            */
+
+                            header("Location: reset_password.php");
+                            exit;
+
+                        } catch (Exception $e) {
+
+                            /* Show PHPMailer error without exposing credentials */
+                            $message =
+                                "Email Error: " . $mail->ErrorInfo;
+
+                            $message_type = "error";
+
+                        }
                     }
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | EMAIL SENT SUCCESSFULLY
-                    |--------------------------------------------------------------------------
-                    */
-
-                    else {
-
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | SAVE RESET EMAIL
-                        |--------------------------------------------------------------------------
-                        */
-
-                        $_SESSION["reset_email"] =
-                            $email;
-
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | SAVE VERIFICATION CODE
-                        |--------------------------------------------------------------------------
-                        */
-
-                        $_SESSION["reset_code"] =
-                            (string)$verification_code;
-
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | CODE EXPIRY - 10 MINUTES
-                        |--------------------------------------------------------------------------
-                        */
-
-                        $_SESSION["reset_expiry"] =
-                            time() + (10 * 60);
-
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | RESET CODE NOT VERIFIED YET
-                        |--------------------------------------------------------------------------
-                        */
-
-                        $_SESSION["code_verified"] =
-                            false;
-
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | GO TO RESET PASSWORD PAGE
-                        |--------------------------------------------------------------------------
-                        */
-
-                        header(
-                            "Location: reset_password.php"
-                        );
-
-                        exit;
-
-                    }
-
                 }
 
-
                 $stmt->close();
-
             }
-
         }
-
     }
-
 }
 
 ?>
+
 
 
 <!DOCTYPE html>
 
 <html lang="en">
 
-
 <head>
 
-
     <meta charset="UTF-8">
-
 
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
-
 
     <title>
         Forgot Password | Velora Drive
@@ -697,13 +346,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         href="https://fonts.googleapis.com"
     >
 
-
     <link
         rel="preconnect"
         href="https://fonts.gstatic.com"
         crossorigin
     >
-
 
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
@@ -721,19 +368,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     <style>
 
-
         /* ==========================================
            RESET
         ========================================== */
 
         * {
-
             margin: 0;
-
             padding: 0;
-
             box-sizing: border-box;
-
         }
 
 
@@ -746,7 +388,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             font-family: "Poppins", sans-serif;
 
             background:
-
                 linear-gradient(
                     135deg,
                     #f8f7f3 0%,
@@ -774,8 +415,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             height: 82px;
 
-            background:
-                rgba(255,255,255,0.97);
+            background: rgba(255,255,255,0.97);
 
             border-bottom:
                 1px solid #e8e3d7;
@@ -1092,7 +732,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             border-radius: 11px;
 
             background:
-
                 linear-gradient(
                     135deg,
                     #d1ad3f,
@@ -1126,7 +765,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         .send-button:hover {
 
             background:
-
                 linear-gradient(
                     135deg,
                     #c29e32,
@@ -1276,9 +914,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         }
 
-
     </style>
-
 
 </head>
 
@@ -1301,11 +937,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 Velora <span>Drive</span>
             </a>
 
-
             <div class="tagline">
-
                 Vehicle Rental Management
-
             </div>
 
         </div>
@@ -1336,9 +969,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <!-- TITLE -->
 
             <h1>
-
                 Forgot Password?
-
             </h1>
 
 
@@ -1360,9 +991,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     class="alert <?php echo htmlspecialchars($message_type); ?>"
                 >
 
-                    <?php
-                    echo htmlspecialchars($message);
-                    ?>
+                    <?php echo htmlspecialchars($message); ?>
 
                 </div>
 
@@ -1388,7 +1017,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <div class="input-wrapper">
 
                     <i class="fa-solid fa-envelope"></i>
-
 
                     <input
                         type="email"
