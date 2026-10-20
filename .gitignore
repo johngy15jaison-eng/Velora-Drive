@@ -1,8 +1,19 @@
+
 uploads/
+vendor/
+
+# Test and diagnostic files
 test.php
 test_db.php
 details_test.php
+phpinfo.php
+
+# Private email configuration
 includes/mail_config.php
 includes/gmail_config.php
-vendor/
-vendor/
+includes/resend_config.php
+
+# Environment secrets
+.env
+.env.*
+!.env.example
