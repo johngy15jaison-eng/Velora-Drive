@@ -1,4 +1,3 @@
-
 <?php
 // IMPORTANT: This file must start with <?php as the very first bytes.
 // Save as UTF-8 without BOM. Do not add blank lines or spaces before <?php.
