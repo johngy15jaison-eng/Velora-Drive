@@ -1,4 +1,3 @@
-
 <?php
 // IMPORTANT: This must be the first content in the file.
 // Save this file as UTF-8 without BOM.
