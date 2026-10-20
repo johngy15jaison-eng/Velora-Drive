@@ -1,75 +1,33 @@
+
 <?php
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-/*
-|--------------------------------------------------------------------------
-| Velora Drive Database Connection
-|--------------------------------------------------------------------------
-| Local XAMPP:
-|   localhost / root / veloradrive
-|
-| Railway:
-|   Uses MYSQLHOST, MYSQLPORT, MYSQLUSER,
-|   MYSQLPASSWORD and MYSQLDATABASE
-|--------------------------------------------------------------------------
-*/
+$host = getenv('MYSQLHOST') ?: '';
+$user = getenv('MYSQLUSER') ?: '';
+$password = getenv('MYSQLPASSWORD');
+$database = getenv('MYSQLDATABASE') ?: '';
+$port = (int) (getenv('MYSQLPORT') ?: 3306);
 
-if (getenv("MYSQLHOST")) {
+// Stop safely if database settings are missing.
+if ($host === '' || $user === '' || $database === '' || $port <= 0) {
+    error_log('Velora Drive: Database environment variables are missing.');
+    http_response_code(500);
+    exit('Database connection is temporarily unavailable.');
+}
 
-    // =========================
-    // Railway / Production
-    // =========================
-
-    $host = getenv("MYSQLHOST");
-    $port = getenv("MYSQLPORT");
-    $user = getenv("MYSQLUSER");
-    $password = getenv("MYSQLPASSWORD");
-    $database = getenv("MYSQLDATABASE");
-
-    if (
-        !$host ||
-        !$port ||
-        !$user ||
-        !$password ||
-        !$database
-    ) {
-        die("Railway MySQL environment variables are missing.");
-    }
-
+try {
     $conn = new mysqli(
         $host,
         $user,
-        $password,
+        $password === false ? '' : $password,
         $database,
-        (int)$port
+        $port
     );
 
-} else {
+    $conn->set_charset('utf8mb4');
 
-    // =========================
-    // Local XAMPP
-    // =========================
-
-    $host = "localhost";
-    $user = "root";
-    $password = "";
-    $database = "veloradrive";
-
-    $conn = new mysqli(
-        $host,
-        $user,
-        $password,
-        $database
-    );
+} catch (mysqli_sql_exception $e) {
+    error_log('Velora Drive database connection failed: ' . $e->getMessage());
+    http_response_code(500);
+    exit('Database connection is temporarily unavailable.');
 }
-
-
-// Check connection
-if ($conn->connect_error) {
-    die("Database connection failed: " . $conn->connect_error);
-}
-
-
-// Use UTF-8
-$conn->set_charset("utf8mb4");
-
-?>
