@@ -19,11 +19,18 @@
     let lastSelectedIndex = -1;
     let animationStart = Date.now();
 
+    // Movement settings
+    const ONE_WAY_DURATION = 5 * 60 * 1000; // 5 minutes
+    const UPDATE_INTERVAL = 500; // Update twice per second
+
     $('vehicleCount').textContent = String(bookings.length);
 
     function safeText(value, fallback = 'Not specified') {
-        if (value === undefined || value === null ||
-            String(value).trim() === '') {
+        if (
+            value === undefined ||
+            value === null ||
+            String(value).trim() === ''
+        ) {
             return fallback;
         }
 
@@ -48,7 +55,7 @@
             booking.destination;
     }
 
-    // Interpret MySQL DATE and DATETIME strings as local dates.
+    // Parse MySQL DATE and DATETIME values as local dates.
     function parseBookingDate(value, isReturn = false) {
         if (!value) return null;
 
@@ -77,6 +84,7 @@
         }
 
         const parsed = new Date(value);
+
         return Number.isNaN(parsed.getTime()) ? null : parsed;
     }
 
@@ -175,7 +183,10 @@
 
     function setText(id, value) {
         const element = $(id);
-        if (element) element.textContent = value;
+
+        if (element) {
+            element.textContent = value;
+        }
     }
 
     function initializeMap() {
@@ -198,26 +209,31 @@
         const pickup = getCoordinates(getPickup(booking));
         const destination = getCoordinates(getDestination(booking));
 
-        // During an active trip, the marker travels back and forth
-        // along the illustrative route every 60 seconds.
-        // Trip status still depends on the actual booking dates.
         let progress = 0;
 
         if (state.status === 'Trip Completed') {
             progress = 1;
         } else if (state.active) {
-            const elapsed = (Date.now() - animationStart) % 60000;
-            const forwardProgress = elapsed / 60000;
+            /*
+             * Smooth back-and-forth simulation.
+             * Five minutes from pickup to destination,
+             * then five minutes back to pickup.
+             */
+            const cycleDuration = ONE_WAY_DURATION * 2;
 
-            // Smooth back-and-forth movement, so the car doesn't teleport
-            // from the destination back to the pickup point.
-            progress = forwardProgress < 0.5
-                ? forwardProgress * 2
-                : 2 - forwardProgress * 2;
+            const elapsed =
+                (Date.now() - animationStart) % cycleDuration;
+
+            const cycleProgress = elapsed / cycleDuration;
+
+            progress = cycleProgress < 0.5
+                ? cycleProgress * 2
+                : 2 - cycleProgress * 2;
         }
 
         const lat = pickup[0] +
             (destination[0] - pickup[0]) * progress;
+
         const lng = pickup[1] +
             (destination[1] - pickup[1]) * progress;
 
@@ -256,10 +272,13 @@
 
             marker = L.marker([lat, lng]).addTo(map);
 
-            map.fitBounds(L.latLngBounds([pickup, destination]), {
-                padding: [35, 35],
-                maxZoom: 10
-            });
+            map.fitBounds(
+                L.latLngBounds([pickup, destination]),
+                {
+                    padding: [35, 35],
+                    maxZoom: 10
+                }
+            );
 
             lastSelectedIndex = selectedIndex;
         }
@@ -280,7 +299,7 @@
         setText('vehicleLongitude', lng.toFixed(5));
 
         if (state.active) {
-            setText('vehicleSpeed', '35 km/h (simulated)');
+            setText('vehicleSpeed', '15 km/h (simulated)');
         } else {
             setText('vehicleSpeed', '0 km/h (simulated)');
         }
@@ -329,11 +348,15 @@
 
     function renderBookings() {
         const list = $('vehicleList');
+
         list.replaceChildren();
 
         if (!bookings.length) {
             const message = document.createElement('p');
-            message.textContent = 'No confirmed bookings are available.';
+
+            message.textContent =
+                'No confirmed bookings are available.';
+
             list.appendChild(message);
 
             setText('vehicleCount', '0');
@@ -349,19 +372,23 @@
             setText('tripProgress', '--');
             setText('tripStatus', '--');
             setText('lastUpdate', '--');
+
             return;
         }
 
         bookings.forEach((booking, index) => {
             const card = document.createElement('button');
+
             card.type = 'button';
             card.className = 'booking-card';
+
             card.setAttribute(
                 'aria-pressed',
                 index === selectedIndex ? 'true' : 'false'
             );
 
             const title = document.createElement('strong');
+
             title.textContent = safeText(
                 getVehicleName(booking),
                 'Vehicle name unavailable'
@@ -369,15 +396,18 @@
 
             const idLine = document.createElement('span');
             const bookingId = getBookingId(booking);
+
             idLine.textContent = bookingId == null
                 ? 'Booking ID: Unavailable'
                 : 'Booking ID: #' + bookingId;
 
             const pickup = document.createElement('span');
+
             pickup.textContent =
                 'Pickup: ' + safeText(getPickup(booking));
 
             const destination = document.createElement('span');
+
             destination.textContent =
                 'Destination: ' + safeText(getDestination(booking));
 
@@ -409,6 +439,6 @@
     initializeMap();
     renderBookings();
 
-    // Update the simulated vehicle location every second.
-    window.setInterval(updateSelectedBooking, 1000);
+    // Frequent small updates make the slower movement look smoother.
+    window.setInterval(updateSelectedBooking, UPDATE_INTERVAL);
 })();
