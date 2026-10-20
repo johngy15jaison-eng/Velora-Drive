@@ -1,6 +1,5 @@
 
 <?php
-
 session_start();
 
 require_once __DIR__ . '/includes/db.php';
@@ -125,7 +124,7 @@ $booking_status = "Confirmed";
 
 /* =========================================
    GPS DEMO STATUS
-   Applies to new bookings only.
+   Applies only to new bookings.
 ========================================= */
 
 $trip_status = "Active";
@@ -171,7 +170,7 @@ if (!$stmt) {
 
 mysqli_stmt_bind_param(
     $stmt,
-    "sssssdssssssssd",
+    "sssssdsssssssds",
     $fullname,
     $email,
     $phone,
@@ -214,15 +213,10 @@ $booking_id = mysqli_insert_id($conn);
 mysqli_stmt_close($stmt);
 
 /* =========================================
-   SAVE BOOKING ID IN SESSION
-========================================= */
-
-$_SESSION['booking_id'] = $booking_id;
-
-/* =========================================
    SAVE BOOKING INFORMATION
 ========================================= */
 
+$_SESSION['booking_id'] = $booking_id;
 $_SESSION['booking_success'] = true;
 $_SESSION['booking_vehicle'] = $vehicle_name;
 $_SESSION['booking_total'] = $total_amount;
@@ -233,5 +227,3 @@ $_SESSION['booking_total'] = $total_amount;
 
 header("Location: booking_success.php");
 exit;
-
-?>
