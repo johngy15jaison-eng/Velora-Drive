@@ -1,28 +1,32 @@
 
 <?php
-// IMPORTANT: This must be the first code in the file.
-// Do not add spaces, blank lines, or a BOM before <?php.
+// Do not put blank lines, spaces, or HTML before this opening PHP tag.
+
+if (headers_sent($sentFile, $sentLine)) {
+    error_log(
+        "Output was sent before gps_tracking.php: " .
+        $sentFile . " on line " . $sentLine
+    );
+    exit('A response was started before GPS tracking could load. Please contact support.');
+}
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Redirect users who are not logged in before sending any HTML.
+// Check login before producing any page output.
 if (empty($_SESSION['email'])) {
-    header("Location: login.php");
-    exit();
+    header('Location: login.php');
+    exit;
 }
 
-// Database connection
+// Load the database only after session handling.
 require_once __DIR__ . '/includes/db.php';
 
 $userEmail = $_SESSION['email'];
 $bookings = [];
 $errorMessage = '';
 
-// Get all confirmed bookings for the logged-in user.
-// The JavaScript will determine whether each trip has started,
-// is active, or has completed based on its booking dates.
 $sql = "SELECT
             id,
             vehicle_name,
@@ -38,10 +42,16 @@ $sql = "SELECT
 
 $stmt = $conn->prepare($sql);
 
-if ($stmt) {
-    $stmt->bind_param("s", $userEmail);
+if ($stmt === false) {
+    error_log('GPS tracking: failed to prepare bookings query.');
+    $errorMessage = 'Unable to load bookings right now.';
+} else {
+    $stmt->bind_param('s', $userEmail);
 
-    if ($stmt->execute()) {
+    if (!$stmt->execute()) {
+        error_log('GPS tracking: failed to execute bookings query.');
+        $errorMessage = 'Unable to load bookings right now.';
+    } else {
         $stmt->bind_result(
             $bookingId,
             $vehicleName,
@@ -63,43 +73,33 @@ if ($stmt) {
                 'trip_status' => $tripStatus
             ];
         }
-    } else {
-        error_log('GPS tracking query execution failed.');
-        $errorMessage = 'Unable to load your bookings right now.';
     }
 
     $stmt->close();
-} else {
-    error_log('GPS tracking query preparation failed.');
-    $errorMessage = 'Unable to load your bookings right now.';
 }
 
-// Encode booking data safely for JavaScript.
 $bookingsJson = json_encode(
     $bookings,
-    JSON_HEX_TAG
-    | JSON_HEX_APOS
-    | JSON_HEX_QUOT
-    | JSON_HEX_AMP
-    | JSON_INVALID_UTF8_SUBSTITUTE
+    JSON_HEX_TAG |
+    JSON_HEX_APOS |
+    JSON_HEX_QUOT |
+    JSON_HEX_AMP |
+    JSON_INVALID_UTF8_SUBSTITUTE
 );
 
 if ($bookingsJson === false) {
     $bookingsJson = '[]';
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>GPS Tracking | Velora Drive</title>
 
     <link rel="stylesheet" href="css/gps_tracking.css">
 
-    <!-- Leaflet map styles -->
     <link
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -139,7 +139,6 @@ if ($bookingsJson === false) {
 </head>
 
 <body>
-
     <main class="gps-container">
 
         <header class="gps-header">
@@ -149,8 +148,8 @@ if ($bookingsJson === false) {
 
         <div class="gps-demo-notice">
             <strong>Demo mode:</strong>
-            This page displays simulated vehicle locations. It does not
-            connect to a real GPS device or show a vehicle's actual location.
+            Vehicle locations on this page are simulated. This page does
+            not access a real GPS device or show a vehicle's actual location.
         </div>
 
         <?php if ($errorMessage !== ''): ?>
@@ -165,12 +164,10 @@ if ($bookingsJson === false) {
                 <p>Your confirmed vehicle bookings will appear here.</p>
             </div>
         <?php else: ?>
-
             <section class="gps-dashboard">
 
                 <div class="gps-map-section">
                     <h2>Vehicle Location Map</h2>
-
                     <div id="map"></div>
                 </div>
 
@@ -178,53 +175,43 @@ if ($bookingsJson === false) {
                     <h2>Tracking Details</h2>
 
                     <div class="gps-info-card">
-                        <p>
-                            <strong>Total Vehicles:</strong>
+                        <p><strong>Total Vehicles:</strong>
                             <span id="vehicleCount">0</span>
                         </p>
 
-                        <p>
-                            <strong>Selected Vehicle:</strong>
+                        <p><strong>Selected Vehicle:</strong>
                             <span id="selectedVehicle">Select a booking</span>
                         </p>
 
-                        <p>
-                            <strong>Booking ID:</strong>
+                        <p><strong>Booking ID:</strong>
                             <span id="selectedVehicleId">--</span>
                         </p>
 
-                        <p>
-                            <strong>Region:</strong>
+                        <p><strong>Region:</strong>
                             <span id="vehicleRegion">--</span>
                         </p>
 
-                        <p>
-                            <strong>Simulated Speed:</strong>
+                        <p><strong>Simulated Speed:</strong>
                             <span id="vehicleSpeed">0 km/h</span>
                         </p>
 
-                        <p>
-                            <strong>Latitude:</strong>
+                        <p><strong>Latitude:</strong>
                             <span id="vehicleLatitude">--</span>
                         </p>
 
-                        <p>
-                            <strong>Longitude:</strong>
+                        <p><strong>Longitude:</strong>
                             <span id="vehicleLongitude">--</span>
                         </p>
 
-                        <p>
-                            <strong>Trip Progress:</strong>
+                        <p><strong>Trip Progress:</strong>
                             <span id="tripProgress">0%</span>
                         </p>
 
-                        <p>
-                            <strong>Last Updated:</strong>
+                        <p><strong>Last Updated:</strong>
                             <span id="lastUpdate">Waiting for update</span>
                         </p>
 
-                        <p>
-                            <strong>Trip Status:</strong>
+                        <p><strong>Trip Status:</strong>
                             <span id="tripStatus">Checking...</span>
                         </p>
                     </div>
@@ -234,22 +221,16 @@ if ($bookingsJson === false) {
                 </div>
 
             </section>
-
         <?php endif; ?>
 
     </main>
 
-    <!-- Make booking data available to the external JavaScript file. -->
     <script>
         window.gpsBookings = <?= $bookingsJson ?>;
         window.bookings = window.gpsBookings;
     </script>
 
-    <!-- Leaflet map library -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <!-- GPS tracking simulation -->
     <script src="js/gps_tracking.js"></script>
-
 </body>
 </html>
