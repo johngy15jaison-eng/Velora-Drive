@@ -1,15 +1,15 @@
 
 <?php
+// IMPORTANT: This must be the first content in the file.
 // Save this file as UTF-8 without BOM.
-// There must be no content before this opening PHP tag.
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Require login before displaying customer tracking information.
+// Require the customer to log in first.
 if (empty($_SESSION['email'])) {
-    header("Location: index.php");
+    header('Location: index.php');
     exit;
 }
 
@@ -19,30 +19,28 @@ $customerEmail = trim($_SESSION['email']);
 $gpsBookings = [];
 $loadError = false;
 
-$sql = "
-    SELECT
-        id,
-        vehicle_name,
-        pickup_location,
-        return_location,
-        booking_date,
-        return_date,
-        trip_status
-    FROM bookings
-    WHERE email = ?
-      AND booking_status = 'Confirmed'
-      AND trip_status = 'Active'
-    ORDER BY id DESC
-";
+// Load only this customer's confirmed bookings with an active trip.
+$sql = "SELECT id, vehicle_name, pickup_location, return_location,
+               booking_date, return_date, trip_status
+        FROM bookings
+        WHERE email = ?
+          AND booking_status = 'Confirmed'
+          AND trip_status = 'Active'
+        ORDER BY id DESC";
 
-$stmt = mysqli_prepare($conn, $sql);
+$stmt = $conn->prepare($sql);
 
-if ($stmt) {
-    mysqli_stmt_bind_param($stmt, "s", $customerEmail);
+if ($stmt === false) {
+    error_log('GPS tracking query preparation failed: ' . $conn->error);
+    $loadError = true;
+} else {
+    $stmt->bind_param('s', $customerEmail);
 
-    if (mysqli_stmt_execute($stmt)) {
-        mysqli_stmt_bind_result(
-            $stmt,
+    if (!$stmt->execute()) {
+        error_log('GPS tracking query execution failed: ' . $stmt->error);
+        $loadError = true;
+    } else {
+        $stmt->bind_result(
             $bookingId,
             $vehicleName,
             $pickupLocation,
@@ -52,29 +50,36 @@ if ($stmt) {
             $tripStatus
         );
 
-        while (mysqli_stmt_fetch($stmt)) {
+        while ($stmt->fetch()) {
             $gpsBookings[] = [
-                'bookingId' => (int)$bookingId,
-                'name' => $vehicleName,
-                'pickup' => $pickupLocation,
-                'destination' => $returnLocation,
-                'bookingDate' => $bookingDate,
-                'returnDate' => $returnDate,
-                'tripStatus' => $tripStatus
+                'bookingId'  => (int) $bookingId,
+                'name'       => (string) $vehicleName,
+                'pickup'     => (string) $pickupLocation,
+                'destination'=> (string) $returnLocation,
+                'bookingDate'=> (string) $bookingDate,
+                'returnDate' => (string) $returnDate,
+                'tripStatus' => (string) $tripStatus
             ];
         }
-    } else {
-        error_log("GPS booking query failed: " . mysqli_stmt_error($stmt));
-        $loadError = true;
     }
 
-    mysqli_stmt_close($stmt);
-} else {
-    error_log("GPS query preparation failed: " . mysqli_error($conn));
-    $loadError = true;
+    $stmt->close();
 }
 
-$vehicleCount = count($gpsBookings);
+// Safely pass booking data to the JavaScript file.
+$gpsBookingsJson = json_encode(
+    $gpsBookings,
+    JSON_HEX_TAG |
+    JSON_HEX_AMP |
+    JSON_HEX_APOS |
+    JSON_HEX_QUOT |
+    JSON_INVALID_UTF8_SUBSTITUTE
+);
+
+if ($gpsBookingsJson === false) {
+    $gpsBookingsJson = '[]';
+    $loadError = true;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -84,208 +89,246 @@ $vehicleCount = count($gpsBookings);
 
     <title>GPS Tracking | Velora Drive</title>
 
-    <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    >
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          crossorigin="">
 
     <link rel="stylesheet" href="css/gps_tracking.css">
+
+    <style>
+        .gps-page {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .gps-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .gps-header h1 {
+            margin: 0 0 8px;
+        }
+
+        .demo-badge {
+            display: inline-block;
+            padding: 7px 12px;
+            border-radius: 20px;
+            background: #fff3cd;
+            color: #765b00;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .gps-notice {
+            margin: 16px 0;
+            padding: 12px 16px;
+            border-radius: 8px;
+            background: #fff8e6;
+            color: #624d12;
+        }
+
+        .gps-error {
+            background: #fff0f0;
+            color: #9b2020;
+        }
+
+        .gps-map-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 16px 0;
+        }
+
+        .gps-map-controls button {
+            cursor: pointer;
+            padding: 9px 15px;
+            border: 1px solid #c8a43b;
+            border-radius: 6px;
+            background: #fff;
+        }
+
+        #map {
+            width: 100%;
+            min-height: 400px;
+            height: 55vh;
+            border-radius: 12px;
+            z-index: 1;
+        }
+
+        .gps-details,
+        .gps-vehicle-list {
+            margin-top: 20px;
+        }
+
+        .gps-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+        }
+
+        .gps-detail-item {
+            padding: 14px;
+            border: 1px solid #e8e2d4;
+            border-radius: 8px;
+            overflow-wrap: anywhere;
+        }
+
+        .gps-detail-item small {
+            display: block;
+            margin-bottom: 6px;
+            color: #666;
+        }
+
+        .gps-empty {
+            padding: 20px;
+            border: 1px solid #e8e2d4;
+            border-radius: 10px;
+            margin-top: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .gps-page {
+                padding: 14px;
+            }
+
+            #map {
+                height: 380px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<header class="topbar">
-    <a href="index.php" class="brand">
-        Velora <span>Drive</span>
-    </a>
+<main class="gps-page">
 
-    <div class="header-right">
-        <span class="demo-badge">
-            <span class="status-dot"></span>
-            GPS Demo Mode
-        </span>
-    </div>
-</header>
-
-<main class="dashboard">
-
-    <section class="page-heading">
+    <header class="gps-header">
         <div>
-            <p class="eyebrow">MY RENTALS</p>
             <h1>GPS Tracking Dashboard</h1>
-            <p class="subtitle">
-                View simulated tracking for your eligible confirmed bookings.
-            </p>
+            <p>View the simulated progress of your active bookings.</p>
         </div>
-    </section>
 
-    <section class="stats-grid">
-        <article class="stat-card">
-            <div class="stat-top">
-                <span class="stat-label">Your Active Trips</span>
-                <span class="stat-icon">🚘</span>
-            </div>
-            <h2 id="vehicleCount"><?= $vehicleCount ?></h2>
-            <p>Eligible confirmed bookings</p>
-        </article>
+        <span class="demo-badge">Demo Mode</span>
+    </header>
 
-        <article class="stat-card">
-            <div class="stat-top">
-                <span class="stat-label">Tracking</span>
-                <span class="stat-icon">📡</span>
-            </div>
-            <h2 class="gold-text">Demo</h2>
-            <p>Simulated movement only</p>
-        </article>
-
-        <article class="stat-card">
-            <div class="stat-top">
-                <span class="stat-label">Map Region</span>
-                <span class="stat-icon">📍</span>
-            </div>
-            <h2>India</h2>
-            <p>Illustrative demo routes</p>
-        </article>
-    </section>
+    <div class="gps-notice">
+        <strong>Demo only:</strong>
+        This page simulates vehicle movement on illustrative routes.
+        It does not use a real GPS device or show the actual location of a vehicle.
+    </div>
 
     <?php if ($loadError): ?>
-        <section class="panel">
-            <h2>Tracking information unavailable</h2>
-            <p>
-                We could not load your bookings. Please refresh the page
-                later or contact support if the problem continues.
-            </p>
-        </section>
 
-    <?php elseif ($vehicleCount === 0): ?>
-        <section class="panel">
-            <h2>No eligible trips to track</h2>
+        <div class="gps-notice gps-error">
+            We couldn't load your tracking information.
+            Please try again later.
+        </div>
+
+    <?php elseif (empty($gpsBookings)): ?>
+
+        <div class="gps-empty">
+            <h3>No active trips to track</h3>
             <p>
-                This page currently shows confirmed bookings whose trip
-                status is Active. Cancelled bookings and bookings that
-                have not been activated are not displayed.
+                Tracking is available here for your confirmed bookings
+                whose trip status is Active.
             </p>
-            <p>
-                The GPS feature is a simulation and does not use a physical
-                GPS device.
-            </p>
-        </section>
+        </div>
 
     <?php else: ?>
 
-        <section class="panel map-panel">
-            <div class="panel-heading">
-                <div>
-                    <h2>Your Vehicle Map</h2>
-                    <p>Select a marker to inspect your booking.</p>
-                </div>
+        <section aria-label="Tracking summary">
+            <h2>
+                Active Vehicles:
+                <span id="vehicleCount">
+                    <?= count($gpsBookings) ?>
+                </span>
+            </h2>
 
-                <div class="map-actions">
-                    <button type="button" id="indiaBtn" class="secondary-btn">
-                        View All India
-                    </button>
-
-                    <button type="button" id="keralaBtn" class="primary-btn">
-                        Focus Kerala
-                    </button>
-                </div>
+            <div class="gps-map-controls">
+                <button type="button" id="indiaBtn">View India</button>
+                <button type="button" id="keralaBtn">View Kerala</button>
             </div>
 
             <div id="map" aria-label="Simulated vehicle tracking map"></div>
 
-            <div class="map-legend">
-                <span><i class="legend-dot moving-dot"></i> Simulated vehicle</span>
-                <span><i class="legend-line"></i> Illustrative demo route</span>
-            </div>
+            <section class="gps-details" aria-label="Selected booking details">
 
-            <p class="disclaimer">
-                Demonstration only: vehicle locations, speeds and routes are
-                simulated. They do not show real-time vehicle positions.
-                No physical GPS device is connected.
-            </p>
-        </section>
-
-        <section class="panel details-panel">
-            <div class="panel-heading details-heading">
-                <div>
-                    <h2>Selected Booking Details</h2>
-                    <p id="selectionHint">Select a booking marker to view details.</p>
-                </div>
-
-                <span class="trip-badge" id="tripStatus">DEMO MODE</span>
-            </div>
-
-            <div class="details-grid">
-                <article class="detail-item">
-                    <span class="detail-label">Vehicle</span>
+                <div class="gps-detail-item">
+                    <small>Vehicle</small>
                     <strong id="selectedVehicle">Select a booking</strong>
-                </article>
-
-                <article class="detail-item">
-                    <span class="detail-label">Booking ID</span>
-                    <strong id="selectedVehicleId">--</strong>
-                </article>
-
-                <article class="detail-item">
-                    <span class="detail-label">Pickup</span>
-                    <strong id="vehicleRegion">--</strong>
-                </article>
-
-                <article class="detail-item">
-                    <span class="detail-label">Destination</span>
-                    <strong id="vehicleSpeed">--</strong>
-                </article>
-
-                <article class="detail-item">
-                    <span class="detail-label">Latitude</span>
-                    <strong id="vehicleLatitude">--</strong>
-                </article>
-
-                <article class="detail-item">
-                    <span class="detail-label">Longitude</span>
-                    <strong id="vehicleLongitude">--</strong>
-                </article>
-
-                <article class="detail-item">
-                    <span class="detail-label">Trip Progress</span>
-                    <strong id="tripProgress">0%</strong>
-                </article>
-
-                <article class="detail-item">
-                    <span class="detail-label">Last Update</span>
-                    <strong id="lastUpdate">Waiting...</strong>
-                </article>
-            </div>
-        </section>
-
-        <section class="panel vehicle-panel">
-            <div class="panel-heading">
-                <div>
-                    <h2>Your Trackable Bookings</h2>
-                    <p>Select a booking to view its simulated route.</p>
                 </div>
-            </div>
 
-            <div id="vehicleList" class="vehicle-list"></div>
+                <div class="gps-detail-item">
+                    <small>Booking ID</small>
+                    <strong id="selectedVehicleId">—</strong>
+                </div>
+
+                <div class="gps-detail-item">
+                    <small>Pickup Location</small>
+                    <strong id="vehicleRegion">—</strong>
+                </div>
+
+                <div class="gps-detail-item">
+                    <small>Destination</small>
+                    <strong id="vehicleSpeed">—</strong>
+                </div>
+
+                <div class="gps-detail-item">
+                    <small>Latitude</small>
+                    <strong id="vehicleLatitude">—</strong>
+                </div>
+
+                <div class="gps-detail-item">
+                    <small>Longitude</small>
+                    <strong id="vehicleLongitude">—</strong>
+                </div>
+
+                <div class="gps-detail-item">
+                    <small>Simulated Trip Progress</small>
+                    <strong id="tripProgress">—</strong>
+                </div>
+
+                <div class="gps-detail-item">
+                    <small>Last Demo Update</small>
+                    <strong id="lastUpdate">—</strong>
+                </div>
+
+                <div class="gps-detail-item">
+                    <small>Trip Status</small>
+                    <strong id="tripStatus">Active</strong>
+                </div>
+
+            </section>
+
+            <p id="selectionHint">
+                Select a booking from the list to view its simulated route.
+            </p>
+
+            <section class="gps-vehicle-list">
+                <h2>Your Active Bookings</h2>
+                <div id="vehicleList"></div>
+            </section>
+
         </section>
 
     <?php endif; ?>
 
 </main>
 
-<footer class="footer">
-    <p>© 2026 Velora Drive | Simulated GPS Demonstration</p>
-</footer>
-
-<?php if (!$loadError && $vehicleCount > 0): ?>
+<?php if (!$loadError && !empty($gpsBookings)): ?>
 <script>
-window.gpsBookings = <?= json_encode(
-    $gpsBookings,
-    JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
-) ?>;
+    window.gpsBookings = <?= $gpsBookingsJson ?>;
 </script>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        crossorigin=""></script>
+
 <script src="js/gps_tracking.js"></script>
 <?php endif; ?>
 
