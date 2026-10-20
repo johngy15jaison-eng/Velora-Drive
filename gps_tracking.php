@@ -1,12 +1,13 @@
+
 <?php
-// IMPORTANT: This must be the first content in the file.
 // Save this file as UTF-8 without BOM.
+// Keep <?php as the first content in the file.
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Require the customer to log in first.
+// Require customer login.
 if (empty($_SESSION['email'])) {
     header('Location: index.php');
     exit;
@@ -18,13 +19,13 @@ $customerEmail = trim($_SESSION['email']);
 $gpsBookings = [];
 $loadError = false;
 
-// Load only this customer's confirmed bookings with an active trip.
+// Load all confirmed bookings belonging to the logged-in customer.
+// JavaScript uses the booking dates to determine trip status.
 $sql = "SELECT id, vehicle_name, pickup_location, return_location,
                booking_date, return_date, trip_status
         FROM bookings
         WHERE email = ?
           AND booking_status = 'Confirmed'
-          AND trip_status = 'Active'
         ORDER BY id DESC";
 
 $stmt = $conn->prepare($sql);
@@ -51,13 +52,13 @@ if ($stmt === false) {
 
         while ($stmt->fetch()) {
             $gpsBookings[] = [
-                'bookingId'  => (int) $bookingId,
-                'name'       => (string) $vehicleName,
-                'pickup'     => (string) $pickupLocation,
-                'destination'=> (string) $returnLocation,
-                'bookingDate'=> (string) $bookingDate,
-                'returnDate' => (string) $returnDate,
-                'tripStatus' => (string) $tripStatus
+                'bookingId'   => (int) $bookingId,
+                'name'        => (string) $vehicleName,
+                'pickup'      => (string) $pickupLocation,
+                'destination' => (string) $returnLocation,
+                'bookingDate' => (string) $bookingDate,
+                'returnDate'  => (string) $returnDate,
+                'tripStatus'  => (string) $tripStatus
             ];
         }
     }
@@ -65,7 +66,7 @@ if ($stmt === false) {
     $stmt->close();
 }
 
-// Safely pass booking data to the JavaScript file.
+// Safely pass booking data to JavaScript.
 $gpsBookingsJson = json_encode(
     $gpsBookings,
     JSON_HEX_TAG |
@@ -88,9 +89,11 @@ if ($gpsBookingsJson === false) {
 
     <title>GPS Tracking | Velora Drive</title>
 
-    <link rel="stylesheet"
-          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-          crossorigin="">
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        crossorigin=""
+    >
 
     <link rel="stylesheet" href="css/gps_tracking.css">
 
@@ -210,7 +213,7 @@ if ($gpsBookingsJson === false) {
     <header class="gps-header">
         <div>
             <h1>GPS Tracking Dashboard</h1>
-            <p>View the simulated progress of your active bookings.</p>
+            <p>View the simulated progress of your confirmed bookings.</p>
         </div>
 
         <span class="demo-badge">Demo Mode</span>
@@ -219,7 +222,8 @@ if ($gpsBookingsJson === false) {
     <div class="gps-notice">
         <strong>Demo only:</strong>
         This page simulates vehicle movement on illustrative routes.
-        It does not use a real GPS device or show the actual location of a vehicle.
+        It does not use a real GPS device or show the actual location
+        of a vehicle.
     </div>
 
     <?php if ($loadError): ?>
@@ -232,18 +236,20 @@ if ($gpsBookingsJson === false) {
     <?php elseif (empty($gpsBookings)): ?>
 
         <div class="gps-empty">
-            <h3>No active trips to track</h3>
+            <h3>No confirmed bookings to track</h3>
             <p>
-                Tracking is available here for your confirmed bookings
-                whose trip status is Active.
+                Your confirmed bookings will appear here.
+                Trip status is calculated from the booking dates
+                in the tracking simulation.
             </p>
         </div>
 
     <?php else: ?>
 
         <section aria-label="Tracking summary">
+
             <h2>
-                Active Vehicles:
+                Confirmed Bookings:
                 <span id="vehicleCount">
                     <?= count($gpsBookings) ?>
                 </span>
@@ -254,9 +260,15 @@ if ($gpsBookingsJson === false) {
                 <button type="button" id="keralaBtn">View Kerala</button>
             </div>
 
-            <div id="map" aria-label="Simulated vehicle tracking map"></div>
+            <div
+                id="map"
+                aria-label="Simulated vehicle tracking map"
+            ></div>
 
-            <section class="gps-details" aria-label="Selected booking details">
+            <section
+                class="gps-details"
+                aria-label="Selected booking details"
+            >
 
                 <div class="gps-detail-item">
                     <small>Vehicle</small>
@@ -300,17 +312,17 @@ if ($gpsBookingsJson === false) {
 
                 <div class="gps-detail-item">
                     <small>Trip Status</small>
-                    <strong id="tripStatus">Active</strong>
+                    <strong id="tripStatus">Checking booking dates...</strong>
                 </div>
 
             </section>
 
             <p id="selectionHint">
-                Select a booking from the list to view its simulated route.
+                Select a booking to view its simulated route.
             </p>
 
             <section class="gps-vehicle-list">
-                <h2>Your Active Bookings</h2>
+                <h2>Your Confirmed Bookings</h2>
                 <div id="vehicleList"></div>
             </section>
 
@@ -321,14 +333,18 @@ if ($gpsBookingsJson === false) {
 </main>
 
 <?php if (!$loadError && !empty($gpsBookings)): ?>
+
 <script>
     window.gpsBookings = <?= $gpsBookingsJson ?>;
 </script>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        crossorigin=""></script>
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    crossorigin=""
+></script>
 
 <script src="js/gps_tracking.js"></script>
+
 <?php endif; ?>
 
 </body>
