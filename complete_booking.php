@@ -1,109 +1,87 @@
 
 <?php
-session_start();
+// IMPORTANT: This file must start with <?php as the very first bytes.
+// Save as UTF-8 without BOM. Do not add blank lines or spaces before <?php.
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 require_once __DIR__ . '/includes/db.php';
 
-/* =========================================
-   HELPER FUNCTION
-========================================= */
-
 function e($value)
 {
-    return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
+    return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');
 }
 
-/* =========================================
-   ONLY ALLOW POST
-========================================= */
-
+// Only accept booking submissions via POST.
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header("Location: booking.php");
     exit;
 }
 
-/* =========================================
-   RECEIVE DATA
-========================================= */
-
+// Customer details
 $fullname = trim($_POST['fullname'] ?? '');
 $email = trim($_POST['email'] ?? '');
 $phone = trim($_POST['phone'] ?? '');
 
+// Vehicle details
 $vehicle_id = trim($_POST['vehicle_id'] ?? '');
 $vehicle_name = trim($_POST['vehicle_name'] ?? '');
 $vehicle_image = trim($_POST['vehicle_image'] ?? '');
 $price = (float)($_POST['price'] ?? 0);
 
+// Locations and dates
 $pickup_location = trim($_POST['pickup_location'] ?? '');
 $return_location = trim($_POST['return_location'] ?? '');
-
 $booking_date = trim($_POST['booking_date'] ?? '');
 $return_date = trim($_POST['return_date'] ?? '');
 
+// Payment details
 $total_amount = (float)($_POST['total_amount'] ?? 0);
-
 $payment_method = trim($_POST['payment_method'] ?? 'Cash');
 
-/* =========================================
-   DOCUMENT DATA
-========================================= */
-
+// Optional uploaded document details
 $license_file = trim($_POST['license_file'] ?? '');
 $license_path = trim($_POST['license_path'] ?? '');
-
 $government_id_file = trim($_POST['government_id_file'] ?? '');
 $government_id_path = trim($_POST['government_id_path'] ?? '');
 
-/* =========================================
-   CHECK REQUIRED DATA
-========================================= */
-
+// Validate required booking information.
 $missing = [];
 
 if ($fullname === '') {
     $missing[] = 'fullname';
 }
-
-if ($email === '') {
-    $missing[] = 'email';
+if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $missing[] = 'valid email';
 }
-
 if ($phone === '') {
     $missing[] = 'phone';
 }
-
 if ($vehicle_name === '') {
     $missing[] = 'vehicle_name';
 }
-
 if ($pickup_location === '') {
     $missing[] = 'pickup_location';
 }
-
 if ($return_location === '') {
     $missing[] = 'return_location';
 }
-
 if ($booking_date === '') {
     $missing[] = 'booking_date';
 }
-
 if ($return_date === '') {
     $missing[] = 'return_date';
 }
-
 if ($total_amount <= 0) {
     $missing[] = 'total_amount';
 }
 
-/* =========================================
-   ERROR IF DATA MISSING
-========================================= */
-
 if (!empty($missing)) {
-    echo "<h2>Booking information is missing</h2>";
-    echo "<p>The following fields were not received:</p>";
+    http_response_code(400);
+    echo "<h2>Booking information is missing or invalid</h2>";
+    echo "<p>Please return to the payment page and check the following fields:</p>";
     echo "<ul>";
 
     foreach ($missing as $field) {
@@ -115,27 +93,14 @@ if (!empty($missing)) {
     exit;
 }
 
-/* =========================================
-   PAYMENT AND BOOKING STATUS
-========================================= */
-
+// New bookings are marked confirmed and active in the simulated GPS demo.
+// Existing bookings are not modified.
 $payment_status = "Paid";
 $booking_status = "Confirmed";
-
-/* =========================================
-   GPS DEMO STATUS
-   Applies only to new bookings.
-========================================= */
-
 $trip_status = "Active";
 
-/* =========================================
-   INSERT INTO BOOKINGS
-========================================= */
-
 $sql = "
-    INSERT INTO bookings
-    (
+    INSERT INTO bookings (
         fullname,
         email,
         phone,
@@ -151,24 +116,20 @@ $sql = "
         booking_status,
         total_amount,
         trip_status
-    )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ";
 
 $stmt = mysqli_prepare($conn, $sql);
 
 if (!$stmt) {
-    die(
-        "Database preparation failed: "
-        . e(mysqli_error($conn))
-    );
+    error_log("Booking SQL preparation failed: " . mysqli_error($conn));
+    http_response_code(500);
+    exit("Sorry, your booking could not be processed. Please try again later.");
 }
 
-/* =========================================
-   BIND VALUES
-========================================= */
-
-mysqli_stmt_bind_param(
+// 15 parameters:
+// 5 strings, 1 double, 7 strings, 1 double, 1 string.
+$bind_result = mysqli_stmt_bind_param(
     $stmt,
     "sssssdsssssssds",
     $fullname,
@@ -188,42 +149,29 @@ mysqli_stmt_bind_param(
     $trip_status
 );
 
-/* =========================================
-   EXECUTE
-========================================= */
-
-if (!mysqli_stmt_execute($stmt)) {
-    die(
-        "Booking could not be saved.<br><br>"
-        . "Database Error: "
-        . e(mysqli_stmt_error($stmt))
-    );
+if (!$bind_result) {
+    error_log("Booking parameter binding failed: " . mysqli_stmt_error($stmt));
+    mysqli_stmt_close($stmt);
+    http_response_code(500);
+    exit("Sorry, your booking could not be processed. Please try again later.");
 }
 
-/* =========================================
-   GET NEW BOOKING ID
-========================================= */
+if (!mysqli_stmt_execute($stmt)) {
+    error_log("Booking insert failed: " . mysqli_stmt_error($stmt));
+    mysqli_stmt_close($stmt);
+    http_response_code(500);
+    exit("Sorry, your booking could not be saved. Please try again later.");
+}
 
+// Save the newly created booking ID before redirecting.
 $booking_id = mysqli_insert_id($conn);
-
-/* =========================================
-   CLOSE STATEMENT
-========================================= */
-
 mysqli_stmt_close($stmt);
-
-/* =========================================
-   SAVE BOOKING INFORMATION
-========================================= */
 
 $_SESSION['booking_id'] = $booking_id;
 $_SESSION['booking_success'] = true;
 $_SESSION['booking_vehicle'] = $vehicle_name;
 $_SESSION['booking_total'] = $total_amount;
 
-/* =========================================
-   REDIRECT
-========================================= */
-
+// Redirect without producing output first.
 header("Location: booking_success.php");
 exit;
