@@ -1,21 +1,18 @@
-<?php
 
+<?php
 session_start();
 
 if (!isset($_SESSION['fullname'])) {
-
     header("Location: index.php");
     exit();
-
 }
 
 require_once __DIR__ . '/includes/db.php';
 
 $fullname = $_SESSION['fullname'];
 
-
 /* =========================================
-   GET BOOKINGS
+   GET BOOKINGS FOR LOGGED-IN USER
 ========================================= */
 
 $sql = "SELECT *
@@ -25,16 +22,11 @@ $sql = "SELECT *
 
 $stmt = mysqli_prepare($conn, $sql);
 
-mysqli_stmt_bind_param(
-    $stmt,
-    "s",
-    $fullname
-);
+mysqli_stmt_bind_param($stmt, "s", $fullname);
 
 mysqli_stmt_execute($stmt);
 
 $result = mysqli_stmt_get_result($stmt);
-
 
 /* =========================================
    HELPER FUNCTION
@@ -43,184 +35,140 @@ $result = mysqli_stmt_get_result($stmt);
 function e($value)
 {
     return htmlspecialchars(
-        $value ?? '',
+        (string)($value ?? ''),
         ENT_QUOTES,
         'UTF-8'
     );
 }
-
 ?>
 
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
+    <meta charset="UTF-8">
 
-<meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+    <title>Velora Drive | My Bookings</title>
 
-<title>
-    Velora Drive | My Bookings
-</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/mybookings.css">
+    <link rel="stylesheet" href="css/responsive.css?v=3001">
+    <link rel="stylesheet" href="css/mobile.css">
 
+    <!-- FONT AWESOME -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    >
 
-<!-- CSS -->
+    <!-- GOOGLE FONT -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
 
-<link
-    rel="stylesheet"
-    href="css/mybookings.css"
-<link rel="stylesheet" href="css/responsive.css?v=3001">
->
+    <!-- TRACK BUTTON STYLING -->
+    <style>
+        .booking-buttons .track-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 11px 18px;
+            background: #c8a43b;
+            color: #ffffff;
+            border: 1px solid #c8a43b;
+            border-radius: 8px;
+            text-decoration: none;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.25s ease,
+                        transform 0.25s ease;
+        }
 
-<link rel="stylesheet" href="css/mobile.css">
+        .booking-buttons .track-btn:hover {
+            background: #a98725;
+            border-color: #a98725;
+            transform: translateY(-2px);
+        }
 
-<!-- FONT AWESOME -->
+        .booking-buttons .track-btn i {
+            font-size: 15px;
+        }
 
-<link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
->
-
-
-<!-- GOOGLE FONT -->
-
-<link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-    rel="stylesheet"
->
-
+        @media (max-width: 600px) {
+            .booking-buttons .track-btn {
+                width: 100%;
+                box-sizing: border-box;
+            }
+        }
+    </style>
 </head>
 
-
 <body>
-
 
 <!-- =========================================
      NAVBAR
 ========================================= -->
 
 <nav>
-
     <div class="logo">
-
         Velora <span>Drive</span>
-
     </div>
 
-
     <ul>
+        <li><a href="home.php">Home</a></li>
+
+        <li><a href="vehicles.php">Vehicles</a></li>
 
         <li>
-            <a href="home.php">
-                Home
-            </a>
-        </li>
-
-
-        <li>
-            <a href="vehicles.php">
-                Vehicles
-            </a>
-        </li>
-
-
-        <li>
-            <a
-                href="mybookings.php"
-                class="active"
-            >
+            <a href="mybookings.php" class="active">
                 My Bookings
             </a>
         </li>
 
+        <li><a href="notifications.php">Notifications</a></li>
 
-        <li>
-            <a href="notifications.php">
-                Notifications
-            </a>
-        </li>
+        <li><a href="profile.php">Profile</a></li>
 
+        <li><a href="about.php">About</a></li>
 
-        <li>
-            <a href="profile.php">
-                Profile
-            </a>
-        </li>
+        <li><a href="contact.php">Contact</a></li>
 
+        <li><a href="faq.php">FAQ</a></li>
 
-        <li>
-            <a href="about.php">
-                About
-            </a>
-        </li>
-
-
-        <li>
-            <a href="contact.php">
-                Contact
-            </a>
-        </li>
-
-
-        <li>
-            <a href="faq.php">
-                FAQ
-            </a>
-        </li>
-
-
-        <li>
-            <a href="logout.php">
-                Logout
-            </a>
-        </li>
-
+        <li><a href="logout.php">Logout</a></li>
     </ul>
-
 </nav>
-
 
 <!-- =========================================
      SUCCESS MESSAGE
 ========================================= -->
 
-<?php
-
-if (
+<?php if (
     isset($_GET['success']) &&
-    $_GET['success'] === "cancelled"
-) {
+    $_GET['success'] === 'cancelled'
+) { ?>
 
-?>
+    <div class="success-message">
+        <i class="fa-solid fa-circle-check"></i>
+        Booking cancelled successfully.
+    </div>
 
-<div class="success-message">
-
-    <i class="fa-solid fa-circle-check"></i>
-
-    Booking cancelled successfully.
-
-</div>
-
-<?php
-
-}
-
-?>
-
+<?php } ?>
 
 <!-- =========================================
      HERO
 ========================================= -->
 
 <section class="hero">
-
     <div class="hero-content">
-
         <h1>
             My <span>Bookings</span>
         </h1>
@@ -228,14 +176,11 @@ if (
         <p>
             View all your vehicle bookings in one place.
         </p>
-
     </div>
-
 </section>
 
-
 <!-- =========================================
-     SEARCH & FILTER
+     SEARCH AND FILTER
 ========================================= -->
 
 <section class="tools">
@@ -244,35 +189,18 @@ if (
         type="text"
         id="searchBooking"
         placeholder="Search Booking"
+        aria-label="Search bookings"
     >
 
-
-    <select id="statusFilter">
-
-        <option value="All">
-            All
-        </option>
-
-        <option value="Confirmed">
-            Confirmed
-        </option>
-
-        <option value="Pending">
-            Pending
-        </option>
-
-        <option value="Completed">
-            Completed
-        </option>
-
-        <option value="Cancelled">
-            Cancelled
-        </option>
-
+    <select id="statusFilter" aria-label="Filter by booking status">
+        <option value="All">All</option>
+        <option value="Confirmed">Confirmed</option>
+        <option value="Pending">Pending</option>
+        <option value="Completed">Completed</option>
+        <option value="Cancelled">Cancelled</option>
     </select>
 
 </section>
-
 
 <!-- =========================================
      BOOKINGS
@@ -280,14 +208,11 @@ if (
 
 <section class="bookings">
 
+<?php if (mysqli_num_rows($result) > 0) { ?>
 
-<?php
+    <?php while ($row = mysqli_fetch_assoc($result)) { ?>
 
-if (mysqli_num_rows($result) > 0) {
-
-    while ($row = mysqli_fetch_assoc($result)) {
-
-
+        <?php
         /* =====================================
            VEHICLE IMAGE PATH
         ===================================== */
@@ -296,371 +221,258 @@ if (mysqli_num_rows($result) > 0) {
             $row['vehicle_image'] ?? ''
         );
 
-
         $imagePath = 'images/default-car.png';
-
 
         if ($vehicleImage !== '') {
 
-            /*
-             * First check the exact path stored
-             * in the database.
-             */
+            // Check the stored relative path.
+            $relativePath = ltrim(
+                str_replace('\\', '/', $vehicleImage),
+                '/'
+            );
 
-            $exactPath =
-                __DIR__ . '/' .
-                ltrim($vehicleImage, '/\\');
+            // Do not allow a database path to escape
+            // the website directory.
+            if (
+                strpos($relativePath, '..') === false &&
+                file_exists(__DIR__ . '/' . $relativePath)
+            ) {
+                $imagePath = $relativePath;
+            } else {
+                // Check images/ using just the filename.
+                $filename = basename($vehicleImage);
 
-
-            if (file_exists($exactPath)) {
-
-                $imagePath =
-                    ltrim(
-                        str_replace('\\', '/', $vehicleImage),
-                        '/'
-                    );
-
-            }
-
-            /*
-             * If database contains only the
-             * filename, look inside images/.
-             */
-
-            else {
-
-                $filename =
-                    basename($vehicleImage);
-
-
-                $imagesPath =
-                    __DIR__ . '/images/' .
-                    $filename;
-
-
-                if (file_exists($imagesPath)) {
-
-                    $imagePath =
-                        'images/' . $filename;
-
+                if (
+                    $filename !== '' &&
+                    file_exists(__DIR__ . '/images/' . $filename)
+                ) {
+                    $imagePath = 'images/' . $filename;
+                } elseif (
+                    $filename !== '' &&
+                    file_exists(__DIR__ . '/uploads/' . $filename)
+                ) {
+                    $imagePath = 'uploads/' . $filename;
                 }
-
-                /*
-                 * Also check uploads/ in case
-                 * older bookings used uploads.
-                 */
-
-                else {
-
-                    $uploadsPath =
-                        __DIR__ . '/uploads/' .
-                        $filename;
-
-
-                    if (file_exists($uploadsPath)) {
-
-                        $imagePath =
-                            'uploads/' . $filename;
-
-                    }
-
-                }
-
             }
-
         }
 
-?>
-
-
-<!-- =========================================
-     BOOKING CARD
-========================================= -->
-
-<div
-    class="booking-card"
-    data-status="<?php echo e($row['booking_status']); ?>"
->
-
-
-    <!-- VEHICLE IMAGE -->
-
-    <div class="vehicle-image">
-
-        <img
-            src="<?php echo e($imagePath); ?>"
-            alt="<?php echo e($row['vehicle_name']); ?>"
-            onerror="this.src='images/default-car.png';"
-        >
-
-    </div>
-
-
-    <!-- BOOKING DETAILS -->
-
-    <div class="booking-details">
-
-
-        <h2>
-
-            <?php echo e($row['vehicle_name']); ?>
-
-        </h2>
-
-
-        <div class="booking-info">
-
-
-            <!-- BOOKING ID -->
-
-            <p>
-
-                <strong>
-                    Booking ID :
-                </strong>
-
-                BK<?php echo str_pad(
-                    $row['id'],
-                    5,
-                    "0",
-                    STR_PAD_LEFT
-                ); ?>
-
-            </p>
-
-
-            <!-- PICKUP DATE -->
-
-            <p>
-
-                <strong>
-                    Pickup Date :
-                </strong>
-
-                <?php
-
-                echo !empty($row['booking_date'])
-                    ? date(
-                        "d M Y",
-                        strtotime($row['booking_date'])
-                    )
-                    : '-';
-
-                ?>
-
-            </p>
-
-
-            <!-- RETURN DATE -->
-
-            <p>
-
-                <strong>
-                    Return Date :
-                </strong>
-
-                <?php
-
-                echo !empty($row['return_date'])
-                    ? date(
-                        "d M Y",
-                        strtotime($row['return_date'])
-                    )
-                    : '-';
-
-                ?>
-
-            </p>
-
-
-            <!-- PICKUP LOCATION -->
-
-            <p>
-
-                <strong>
-                    Pickup Location :
-                </strong>
-
-                <?php echo e(
-                    $row['pickup_location']
-                ); ?>
-
-            </p>
-
-
-            <!-- RETURN LOCATION -->
-
-            <p>
-
-                <strong>
-                    Return Location :
-                </strong>
-
-                <?php echo e(
-                    $row['return_location']
-                ); ?>
-
-            </p>
-
-
-            <!-- TOTAL AMOUNT -->
-
-            <p>
-
-                <strong>
-                    Total Amount :
-                </strong>
-
-                ₹<?php echo number_format(
-                    (float)$row['total_amount'],
-                    2
-                ); ?>
-
-            </p>
-
-
-            <!-- PAYMENT -->
-
-            <p>
-
-                <strong>
-                    Payment :
-                </strong>
-
-                <span class="payment">
-
-                    <?php echo e(
-                        $row['payment_status']
-                    ); ?>
-
-                </span>
-
-            </p>
-
-
-            <!-- STATUS -->
-
-            <p>
-
-                <strong>
-                    Status :
-                </strong>
-
-                <span
-                    class="status <?php echo strtolower(
-                        e($row['booking_status'])
-                    ); ?>"
-                >
-
-                    <?php echo e(
-                        $row['booking_status']
-                    ); ?>
-
-                </span>
-
-            </p>
-
-
-        </div>
-
+        $bookingStatus = trim(
+            (string)($row['booking_status'] ?? '')
+        );
+
+        $bookingId = (int)$row['id'];
+        ?>
 
         <!-- =====================================
-             BUTTONS
+             BOOKING CARD
         ====================================== -->
 
-        <div class="booking-buttons">
+        <div
+            class="booking-card"
+            data-status="<?php echo e($bookingStatus); ?>"
+        >
 
+            <!-- VEHICLE IMAGE -->
 
-            <a
-                href="booking_details.php?id=<?php echo (int)$row['id']; ?>"
-                class="view-btn"
-            >
-
-                View Details
-
-            </a>
-
-
-            <?php
-
-            if (
-                $row['booking_status'] === "Confirmed" ||
-                $row['booking_status'] === "Pending"
-            ) {
-
-            ?>
-
-                <a
-                    href="cancel_booking.php?id=<?php echo (int)$row['id']; ?>"
-                    class="cancel-btn"
-                    onclick="return confirm(
-                        'Are you sure you want to cancel this booking?'
-                    );"
+            <div class="vehicle-image">
+                <img
+                    src="<?php echo e($imagePath); ?>"
+                    alt="<?php echo e($row['vehicle_name'] ?? 'Rental vehicle'); ?>"
+                    onerror="this.onerror=null;this.src='images/default-car.png';"
                 >
+            </div>
 
-                    Cancel Booking
+            <!-- BOOKING DETAILS -->
 
-                </a>
+            <div class="booking-details">
 
-            <?php
+                <h2>
+                    <?php echo e($row['vehicle_name'] ?? 'Vehicle'); ?>
+                </h2>
 
-            }
+                <div class="booking-info">
 
-            ?>
+                    <!-- BOOKING ID -->
 
+                    <p>
+                        <strong>Booking ID:</strong>
+
+                        BK<?php echo str_pad(
+                            (string)$bookingId,
+                            5,
+                            '0',
+                            STR_PAD_LEFT
+                        ); ?>
+                    </p>
+
+                    <!-- PICKUP DATE -->
+
+                    <p>
+                        <strong>Pickup Date:</strong>
+
+                        <?php
+                        echo !empty($row['booking_date'])
+                            ? e(date(
+                                'd M Y',
+                                strtotime($row['booking_date'])
+                            ))
+                            : '-';
+                        ?>
+                    </p>
+
+                    <!-- RETURN DATE -->
+
+                    <p>
+                        <strong>Return Date:</strong>
+
+                        <?php
+                        echo !empty($row['return_date'])
+                            ? e(date(
+                                'd M Y',
+                                strtotime($row['return_date'])
+                            ))
+                            : '-';
+                        ?>
+                    </p>
+
+                    <!-- PICKUP LOCATION -->
+
+                    <p>
+                        <strong>Pickup Location:</strong>
+
+                        <?php echo e(
+                            $row['pickup_location'] ?? ''
+                        ); ?>
+                    </p>
+
+                    <!-- RETURN LOCATION -->
+
+                    <p>
+                        <strong>Return Location:</strong>
+
+                        <?php echo e(
+                            $row['return_location'] ?? ''
+                        ); ?>
+                    </p>
+
+                    <!-- TOTAL AMOUNT -->
+
+                    <p>
+                        <strong>Total Amount:</strong>
+
+                        ₹<?php echo number_format(
+                            (float)($row['total_amount'] ?? 0),
+                            2
+                        ); ?>
+                    </p>
+
+                    <!-- PAYMENT STATUS -->
+
+                    <p>
+                        <strong>Payment:</strong>
+
+                        <span class="payment">
+                            <?php echo e(
+                                $row['payment_status'] ?? 'Not specified'
+                            ); ?>
+                        </span>
+                    </p>
+
+                    <!-- BOOKING STATUS -->
+
+                    <p>
+                        <strong>Status:</strong>
+
+                        <span class="status <?php echo e(
+                            strtolower($bookingStatus)
+                        ); ?>">
+                            <?php echo e($bookingStatus); ?>
+                        </span>
+                    </p>
+
+                </div>
+
+                <!-- =====================================
+                     BOOKING BUTTONS
+                ====================================== -->
+
+                <div class="booking-buttons">
+
+                    <!-- VIEW DETAILS -->
+
+                    <a
+                        href="booking_details.php?id=<?php echo $bookingId; ?>"
+                        class="view-btn"
+                    >
+                        <i class="fa-solid fa-eye"></i>
+                        View Details
+                    </a>
+
+                    <!-- TRACK VEHICLE: CONFIRMED BOOKINGS ONLY -->
+
+                    <?php if ($bookingStatus === 'Confirmed') { ?>
+
+                        <a
+                            href="gps_tracking.php?booking_id=<?php echo $bookingId; ?>"
+                            class="track-btn"
+                        >
+                            <i class="fa-solid fa-location-crosshairs"></i>
+                            Track Vehicle
+                        </a>
+
+                    <?php } ?>
+
+                    <!-- CANCEL BOOKING -->
+
+                    <?php if (
+                        $bookingStatus === 'Confirmed' ||
+                        $bookingStatus === 'Pending'
+                    ) { ?>
+
+                        <a
+                            href="cancel_booking.php?id=<?php echo $bookingId; ?>"
+                            class="cancel-btn"
+                            onclick="return confirm('Are you sure you want to cancel this booking?');"
+                        >
+                            <i class="fa-solid fa-xmark"></i>
+                            Cancel Booking
+                        </a>
+
+                    <?php } ?>
+
+                </div>
+
+            </div>
 
         </div>
 
+    <?php } ?>
+
+<?php } else { ?>
+
+    <!-- =========================================
+         EMPTY BOOKING
+    ========================================= -->
+
+    <div class="empty-booking">
+
+        <i class="fa-solid fa-car"></i>
+
+        <h2>No Bookings Found</h2>
+
+        <p>
+            You haven't booked any vehicle yet.
+        </p>
+
+        <a href="vehicles.php">
+            Book a Vehicle
+        </a>
 
     </div>
 
-
-</div>
-
-
-<?php
-
-    }
-
-}
-
-else {
-
-?>
-
-
-<!-- =========================================
-     EMPTY BOOKING
-========================================= -->
-
-<div class="empty-booking">
-
-    <i class="fa-solid fa-car"></i>
-
-    <h2>
-        No Bookings Found
-    </h2>
-
-    <p>
-        You haven't booked any vehicle yet.
-    </p>
-
-    <a href="vehicles.php">
-        Book a Vehicle
-    </a>
-
-</div>
-
-
-<?php
-
-}
-
-?>
-
+<?php } ?>
 
 </section>
-
 
 <!-- =========================================
      JAVASCRIPT
@@ -668,13 +480,9 @@ else {
 
 <script src="js/mybookings.js"></script>
 
-
 </body>
-
 </html>
 
 <?php
-
 mysqli_stmt_close($stmt);
-
 ?>
