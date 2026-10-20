@@ -8,30 +8,50 @@
 
     const $ = (id) => document.getElementById(id);
 
-    const fields = [
-        'vehicleCount', 'selectedVehicle', 'selectedVehicleId',
-        'vehiclePickup', 'vehicleDestination', 'bookingStart',
-        'bookingReturn', 'vehicleSpeed', 'vehicleLatitude',
-        'vehicleLongitude', 'tripProgress', 'tripStatus', 'lastUpdate'
-    ];
-
-    // Stop cleanly if the page does not contain the tracking panel.
     if (!$('vehicleList')) return;
+
+    let map = null;
+    let marker = null;
+    let routeLine = null;
+    let startMarker = null;
+    let endMarker = null;
+    let selectedIndex = 0;
+    let lastSelectedIndex = -1;
+    let animationStart = Date.now();
 
     $('vehicleCount').textContent = String(bookings.length);
 
-    function text(value, fallback = 'Not specified') {
-        if (value === null || value === undefined ||
+    function safeText(value, fallback = 'Not specified') {
+        if (value === undefined || value === null ||
             String(value).trim() === '') {
             return fallback;
         }
+
         return String(value);
     }
 
-    function dateValue(value, isReturn = false) {
+    function getBookingId(booking) {
+        return booking.id ?? booking.booking_id ?? booking.bookingId;
+    }
+
+    function getVehicleName(booking) {
+        return booking.vehicle_name ?? booking.vehicleName;
+    }
+
+    function getPickup(booking) {
+        return booking.pickup_location ?? booking.pickupLocation;
+    }
+
+    function getDestination(booking) {
+        return booking.return_location ??
+            booking.returnLocation ??
+            booking.destination;
+    }
+
+    // Interpret MySQL DATE and DATETIME strings as local dates.
+    function parseBookingDate(value, isReturn = false) {
         if (!value) return null;
 
-        // Parse database DATE or DATETIME values as local time.
         const match = String(value).match(
             /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/
         );
@@ -47,7 +67,9 @@
             }
 
             return new Date(
-                year, month, day,
+                year,
+                month,
+                day,
                 Number(match[4] || 0),
                 Number(match[5] || 0),
                 Number(match[6] || 0)
@@ -58,13 +80,11 @@
         return Number.isNaN(parsed.getTime()) ? null : parsed;
     }
 
-    function formatDate(value) {
-        if (!value) return 'Not specified';
-        return value.toLocaleString();
+    function formatDate(date) {
+        return date ? date.toLocaleString() : 'Not specified';
     }
 
-    // Approximate Kerala locations for the illustrative map.
-    // Unknown place names use a Kerala fallback, not geocoded GPS data.
+    // Approximate coordinates for illustrative Kerala routes.
     const places = {
         'pathanamthitta': [9.2648, 76.7870],
         'thiruvalla': [9.3816, 76.5748],
@@ -86,80 +106,197 @@
         'kasaragod': [12.4996, 74.9869]
     };
 
-    function locationPoint(location) {
+    function getCoordinates(location) {
         const key = String(location || '').trim().toLowerCase();
+
         if (places[key]) return places[key];
 
         for (const name of Object.keys(places)) {
             if (key.includes(name)) return places[name];
         }
 
+        // Fallback for unrecognized locations.
         return [9.9312, 76.2673];
     }
 
-    let map = null;
-    let marker = null;
-    let routeLine = null;
-    let selectedIndex = 0;
-    let selectedRoute = null;
+    function getTripState(booking, now) {
+        const start = parseBookingDate(
+            booking.booking_date ?? booking.bookingDate
+        );
 
-    if (window.L && $('map')) {
-        map = L.map('map').setView([10.2, 76.2], 7);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors',
-            maxZoom: 19
-        }).addTo(map);
-    }
-
-    function set(id, value) {
-        const element = $(id);
-        if (element) element.textContent = value;
-    }
-
-    function getBookingStatus(booking, now) {
-        const start = dateValue(booking.booking_date ?? booking.bookingDate);
-        const end = dateValue(
+        const end = parseBookingDate(
             booking.return_date ?? booking.returnDate,
             true
         );
 
         if (!start || !end) {
             return {
-                start, end, progress: 0, speed: 0,
-                status: 'Dates unavailable'
+                start,
+                end,
+                status: 'Dates unavailable',
+                active: false
             };
         }
 
         if (end <= start) {
             return {
-                start, end, progress: 0, speed: 0,
-                status: 'Invalid booking dates'
+                start,
+                end,
+                status: 'Invalid booking dates',
+                active: false
             };
         }
 
         if (now < start) {
             return {
-                start, end, progress: 0, speed: 0,
-                status: 'Trip Not Started'
+                start,
+                end,
+                status: 'Trip Not Started',
+                active: false
             };
         }
 
         if (now >= end) {
             return {
-                start, end, progress: 100, speed: 0,
-                status: 'Trip Completed'
+                start,
+                end,
+                status: 'Trip Completed',
+                active: false
             };
         }
 
-        const progress = Math.max(0, Math.min(
-            100, ((now - start) / (end - start)) * 100
-        ));
-
         return {
-            start, end, progress, speed: 35,
-            status: 'Trip Active'
+            start,
+            end,
+            status: 'Trip Active',
+            active: true
         };
+    }
+
+    function setText(id, value) {
+        const element = $(id);
+        if (element) element.textContent = value;
+    }
+
+    function initializeMap() {
+        if (!window.L || !$('map')) return;
+
+        map = L.map('map').setView([10.1, 76.3], 7);
+
+        L.tileLayer(
+            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            {
+                attribution: '&copy; OpenStreetMap contributors',
+                maxZoom: 19
+            }
+        ).addTo(map);
+    }
+
+    function updateMap(booking, state) {
+        if (!map) return;
+
+        const pickup = getCoordinates(getPickup(booking));
+        const destination = getCoordinates(getDestination(booking));
+
+        // During an active trip, the marker travels back and forth
+        // along the illustrative route every 60 seconds.
+        // Trip status still depends on the actual booking dates.
+        let progress = 0;
+
+        if (state.status === 'Trip Completed') {
+            progress = 1;
+        } else if (state.active) {
+            const elapsed = (Date.now() - animationStart) % 60000;
+            const forwardProgress = elapsed / 60000;
+
+            // Smooth back-and-forth movement, so the car doesn't teleport
+            // from the destination back to the pickup point.
+            progress = forwardProgress < 0.5
+                ? forwardProgress * 2
+                : 2 - forwardProgress * 2;
+        }
+
+        const lat = pickup[0] +
+            (destination[0] - pickup[0]) * progress;
+        const lng = pickup[1] +
+            (destination[1] - pickup[1]) * progress;
+
+        if (lastSelectedIndex !== selectedIndex) {
+            if (marker) map.removeLayer(marker);
+            if (routeLine) map.removeLayer(routeLine);
+            if (startMarker) map.removeLayer(startMarker);
+            if (endMarker) map.removeLayer(endMarker);
+
+            routeLine = L.polyline(
+                [pickup, destination],
+                {
+                    color: '#c8a43b',
+                    weight: 4,
+                    dashArray: '8 8'
+                }
+            ).addTo(map);
+
+            startMarker = L.circleMarker(pickup, {
+                radius: 6,
+                color: '#218838',
+                fillColor: '#218838',
+                fillOpacity: 1
+            }).addTo(map).bindPopup(
+                'Pickup: ' + safeText(getPickup(booking))
+            );
+
+            endMarker = L.circleMarker(destination, {
+                radius: 6,
+                color: '#c0392b',
+                fillColor: '#c0392b',
+                fillOpacity: 1
+            }).addTo(map).bindPopup(
+                'Destination: ' + safeText(getDestination(booking))
+            );
+
+            marker = L.marker([lat, lng]).addTo(map);
+
+            map.fitBounds(L.latLngBounds([pickup, destination]), {
+                padding: [35, 35],
+                maxZoom: 10
+            });
+
+            lastSelectedIndex = selectedIndex;
+        }
+
+        marker.setLatLng([lat, lng]);
+
+        const bookingId = getBookingId(booking);
+
+        marker.bindPopup(
+            '<strong>' +
+            safeText(getVehicleName(booking), 'Vehicle') +
+            '</strong><br>Booking ID: ' +
+            (bookingId == null ? 'Unavailable' : '#' + bookingId) +
+            '<br>' + state.status
+        );
+
+        setText('vehicleLatitude', lat.toFixed(5));
+        setText('vehicleLongitude', lng.toFixed(5));
+
+        if (state.active) {
+            setText('vehicleSpeed', '35 km/h (simulated)');
+        } else {
+            setText('vehicleSpeed', '0 km/h (simulated)');
+        }
+
+        if (state.status === 'Trip Completed') {
+            setText('tripProgress', '100%');
+        } else if (state.status === 'Trip Not Started') {
+            setText('tripProgress', '0%');
+        } else if (state.active) {
+            setText(
+                'tripProgress',
+                Math.round(progress * 100) + '% (simulation)'
+            );
+        } else {
+            setText('tripProgress', '--');
+        }
     }
 
     function updateSelectedBooking() {
@@ -167,70 +304,27 @@
 
         const booking = bookings[selectedIndex];
         const now = new Date();
+        const state = getTripState(booking, now);
+        const bookingId = getBookingId(booking);
 
-        const id = booking.id ?? booking.booking_id ?? booking.bookingId;
-        const name = booking.vehicle_name ?? booking.vehicleName;
-        const pickup = booking.pickup_location ?? booking.pickupLocation;
-        const destination = booking.return_location ??
-            booking.returnLocation ?? booking.destination;
-
-        const state = getBookingStatus(booking, now);
-
-        set('selectedVehicle', text(name, 'Vehicle name unavailable'));
-        set('selectedVehicleId', id === undefined || id === null
-            ? 'Unavailable' : '#' + id);
-        set('vehiclePickup', text(pickup));
-        set('vehicleDestination', text(destination));
-        set('bookingStart', formatDate(state.start));
-        set('bookingReturn', formatDate(state.end));
-        set('vehicleSpeed', state.speed + ' km/h');
-        set('tripProgress', state.progress.toFixed(1) + '%');
-        set('tripStatus', state.status);
-        set('lastUpdate', now.toLocaleTimeString());
-
-        if (!map) return;
-
-        const startPoint = locationPoint(pickup);
-        const endPoint = locationPoint(destination);
-
-        // Illustrative straight line between approximate town locations.
-        const fraction = state.progress / 100;
-        const lat = startPoint[0] +
-            (endPoint[0] - startPoint[0]) * fraction;
-        const lng = startPoint[1] +
-            (endPoint[1] - startPoint[1]) * fraction;
-
-        set('vehicleLatitude', lat.toFixed(5));
-        set('vehicleLongitude', lng.toFixed(5));
-
-        if (!selectedRoute) {
-            selectedRoute = [startPoint, endPoint];
-            routeLine = L.polyline(selectedRoute, {
-                color: '#c8a43b',
-                weight: 4,
-                dashArray: '8 8'
-            }).addTo(map);
-        } else {
-            selectedRoute = [startPoint, endPoint];
-            routeLine.setLatLngs(selectedRoute);
-        }
-
-        if (!marker) {
-            marker = L.marker([lat, lng]).addTo(map);
-        } else {
-            marker.setLatLng([lat, lng]);
-        }
-
-        marker.bindPopup(
-            '<strong>' + text(name, 'Vehicle') + '</strong><br>' +
-            'Booking ID: ' + (id == null ? 'Unavailable' : '#' + id) +
-            '<br>' + state.status
+        setText(
+            'selectedVehicle',
+            safeText(getVehicleName(booking), 'Vehicle name unavailable')
         );
 
-        map.fitBounds(L.latLngBounds(selectedRoute), {
-            padding: [30, 30],
-            maxZoom: 10
-        });
+        setText(
+            'selectedVehicleId',
+            bookingId == null ? 'Unavailable' : '#' + bookingId
+        );
+
+        setText('vehiclePickup', safeText(getPickup(booking)));
+        setText('vehicleDestination', safeText(getDestination(booking)));
+        setText('bookingStart', formatDate(state.start));
+        setText('bookingReturn', formatDate(state.end));
+        setText('tripStatus', state.status);
+        setText('lastUpdate', now.toLocaleTimeString());
+
+        updateMap(booking, state);
     }
 
     function renderBookings() {
@@ -241,10 +335,20 @@
             const message = document.createElement('p');
             message.textContent = 'No confirmed bookings are available.';
             list.appendChild(message);
-            fields.forEach(id => {
-                if (id !== 'vehicleCount') set(id, '--');
-            });
-            set('vehicleCount', '0');
+
+            setText('vehicleCount', '0');
+            setText('selectedVehicle', 'No bookings');
+            setText('selectedVehicleId', '--');
+            setText('vehiclePickup', '--');
+            setText('vehicleDestination', '--');
+            setText('bookingStart', '--');
+            setText('bookingReturn', '--');
+            setText('vehicleSpeed', '--');
+            setText('vehicleLatitude', '--');
+            setText('vehicleLongitude', '--');
+            setText('tripProgress', '--');
+            setText('tripStatus', '--');
+            setText('lastUpdate', '--');
             return;
         }
 
@@ -252,48 +356,46 @@
             const card = document.createElement('button');
             card.type = 'button';
             card.className = 'booking-card';
-            card.setAttribute('aria-pressed', index === selectedIndex
-                ? 'true' : 'false');
+            card.setAttribute(
+                'aria-pressed',
+                index === selectedIndex ? 'true' : 'false'
+            );
 
             const title = document.createElement('strong');
-            title.textContent = text(
-                booking.vehicle_name ?? booking.vehicleName,
+            title.textContent = safeText(
+                getVehicleName(booking),
                 'Vehicle name unavailable'
             );
 
-            const id = booking.id ?? booking.booking_id ?? booking.bookingId;
             const idLine = document.createElement('span');
-            idLine.textContent = id == null
+            const bookingId = getBookingId(booking);
+            idLine.textContent = bookingId == null
                 ? 'Booking ID: Unavailable'
-                : 'Booking ID: #' + id;
+                : 'Booking ID: #' + bookingId;
 
             const pickup = document.createElement('span');
-            pickup.textContent = 'Pickup: ' + text(
-                booking.pickup_location ?? booking.pickupLocation
-            );
+            pickup.textContent =
+                'Pickup: ' + safeText(getPickup(booking));
 
             const destination = document.createElement('span');
-            destination.textContent = 'Destination: ' + text(
-                booking.return_location ?? booking.returnLocation ??
-                booking.destination
-            );
+            destination.textContent =
+                'Destination: ' + safeText(getDestination(booking));
 
             card.append(title, idLine, pickup, destination);
 
             card.addEventListener('click', function () {
                 selectedIndex = index;
-                selectedRoute = null;
+                animationStart = Date.now();
+                lastSelectedIndex = -1;
 
-                if (routeLine && map) {
-                    map.removeLayer(routeLine);
-                    routeLine = null;
-                }
-
-                card.parentElement.querySelectorAll('.booking-card')
-                    .forEach((other, i) => {
-                        other.setAttribute('aria-pressed',
-                            i === selectedIndex ? 'true' : 'false');
-                    });
+                list.querySelectorAll('.booking-card').forEach(
+                    (otherCard, otherIndex) => {
+                        otherCard.setAttribute(
+                            'aria-pressed',
+                            otherIndex === selectedIndex ? 'true' : 'false'
+                        );
+                    }
+                );
 
                 updateSelectedBooking();
             });
@@ -304,9 +406,9 @@
         updateSelectedBooking();
     }
 
+    initializeMap();
     renderBookings();
 
-    // Update progress based on the booking dates, not an endlessly
-    // looping animation.
-    window.setInterval(updateSelectedBooking, 5000);
+    // Update the simulated vehicle location every second.
+    window.setInterval(updateSelectedBooking, 1000);
 })();
