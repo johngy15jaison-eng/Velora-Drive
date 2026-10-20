@@ -1,26 +1,13 @@
-
 <?php
-// Do not put blank lines, spaces, or HTML before this opening PHP tag.
-
-if (headers_sent($sentFile, $sentLine)) {
-    error_log(
-        "Output was sent before gps_tracking.php: " .
-        $sentFile . " on line " . $sentLine
-    );
-    exit('A response was started before GPS tracking could load. Please contact support.');
-}
-
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Check login before producing any page output.
 if (empty($_SESSION['email'])) {
     header('Location: login.php');
     exit;
 }
 
-// Load the database only after session handling.
 require_once __DIR__ . '/includes/db.php';
 
 $userEmail = $_SESSION['email'];
@@ -96,6 +83,7 @@ if ($bookingsJson === false) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>GPS Tracking | Velora Drive</title>
 
     <link rel="stylesheet" href="css/gps_tracking.css">
@@ -148,8 +136,8 @@ if ($bookingsJson === false) {
 
         <div class="gps-demo-notice">
             <strong>Demo mode:</strong>
-            Vehicle locations on this page are simulated. This page does
-            not access a real GPS device or show a vehicle's actual location.
+            This page displays simulated vehicle locations. It does not
+            connect to a real GPS device or show the vehicle's actual location.
         </div>
 
         <?php if ($errorMessage !== ''): ?>
